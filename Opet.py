@@ -14,7 +14,7 @@ MAGENTA = "\033[95m"
 CYAN    = "\033[96m"
 WHITE   = "\033[97m"
 
-class PyR2GodMode:
+class Runnow:
     def __init__(self, filepath):
         self.filepath = filepath
         self.cursor = 0x0
@@ -137,7 +137,7 @@ class PyR2GodMode:
         print()
 
     def analyze_entropy_map(self):
-        print(f"\n[*] Shannon Entropy Analysis")
+        print(f"\n[INFO] Shannon Entropy Analysis")
         block_size = 512
         print("Block\tVirtual Addr\tScore\t\tStatus / Graph")
         print("-" * 75)
@@ -160,7 +160,7 @@ class PyR2GodMode:
 
     def print_strings(self, args):
         filter_keyword = args[0].lower() if args else None
-        print(f"\n[*] Extracting ASCII strings (Min length: 5)...")
+        print(f"\n[INFO] Extracting ASCII strings (Min length: 5)...")
         matches = re.finditer(b"[\\x20-\\x7E]{5,}", self.binary_data)
 
         for match in matches:
@@ -180,7 +180,7 @@ class PyR2GodMode:
 
     def run_shell(self):
         filename = os.path.basename(self.filepath)
-        print(f"[+] Loaded: {filename} ({self.file_size} bytes)")
+        print(f"[INFO] Loaded: {filename} ({self.file_size} bytes)")
 
         while True:
             try:
@@ -229,5 +229,5 @@ if __name__ == "__main__":
         print(f"Usage: python {sys.argv[0]} <binary_path>")
         sys.exit(1)
 
-    engine = PyR2GodMode(sys.argv[1])
+    engine = Runnow(sys.argv[1])
     engine.run_shell()
