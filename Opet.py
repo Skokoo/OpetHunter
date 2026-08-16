@@ -4,16 +4,6 @@ import re
 import math
 from capstone import *
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-dec_folder_path = os.path.join(current_dir, "DEC")
-if dec_folder_path not in sys.path:
-    sys.path.insert(0, dec_folder_path)
-try:
-    from CDec import CapstoneDecompiler
-except ImportError:
-    print(f"[ERROR*] File CDec.py not found on dir: {dec_folder_path}")
-    sys.exit(1)
-
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
@@ -23,10 +13,6 @@ BLUE    = "\033[34m"
 MAGENTA = "\033[95m"
 CYAN    = "\033[96m"
 WHITE   = "\033[97m"
-
-# Opet' v0.1.0
-# Copyright 2026 Skokoo
-# Licensed under the Apache License, Version 2.0
 
 class Runnow:
     def __init__(self, filepath):
@@ -70,8 +56,8 @@ class Runnow:
             if ask != 'y':
                 print("[INFO] Printing canceled.")
                 return
-        
-        def print_disasm(self, args):
+        print(out_str)
+    def print_disasm(self, args):
         count = 15
         if args:
             try: count = int(args[0])
@@ -107,70 +93,6 @@ class Runnow:
         lines.append("-" * 85 + "\n")
         self.check_and_print("\n".join(lines))
 
-    def translate_bytes_to_c(self, chunk, start_vaddr):       
-        c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
-        last_cmp = ""
-        reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
-
-        for insn in self.cs.disasm(chunk, start_vaddr):
-            op = insn.op_str
-            for r, v in reg_map.items():
-                op = re.sub(rf'\b{r}\b', v, op)
-
-            if insn.mnemonic == "mov":
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} = {parts[1].strip()};")
-            elif insn.mnemonic == "add":
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} += {parts[1].strip()};")
-            elif insn.mnemonic == "sub":
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")
-            elif insn.mnemonic == "xor":
-                parts = op.split(",")
-                if len(parts) == 2:
-                    if parts[0].strip() == parts[1].strip(): c_lines.append(f"        {parts[0].strip()} = 0;")
-                    else: c_lines.append(f"        {parts[0].strip()} ^= {parts[1].strip()};")
-            elif insn.mnemonic == "cmp":
-                last_cmp = op.replace(",", " ==")
-            elif insn.mnemonic == "je" and last_cmp:
-                c_lines.append(f"        if ({last_cmp}) {{ // branch")
-            elif insn.mnemonic == "jne" and last_cmp:
-                c_lines.append(f"        if (!({last_cmp})) {{ // branch")
-            elif insn.mnemonic == "call":
-                c_lines.append(f"        sub_{insn.op_str.strip()}();")
-            elif insn.mnemonic == "ret":
-                c_lines.append(f"        return local_res;")
-                break
-        c_lines.append("    }")
-        return "\n".join(c_lines)
-
-    def print_strings(self, args):        
-        filter_keyword = args[0].lower() if args else None
-        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]
-        matches = re.finditer(b"[\\x20-\\x7E]{5,}", self.binary_data)
-
-        for match in matches:
-            raw_str = match.group().decode('ascii', errors='ignore')
-            if filter_keyword and filter_keyword not in raw_str.lower(): continue
-
-            offset = match.start()
-            vaddr = self.base_address + offset            
-            color = GREEN
-            if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password", "flag{"]): color = RED
-            elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc", "main"]): color = CYAN
-
-            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")           
-            
-            local_offset = offset + len(match.group())
-            if local_offset + 64 <= self.file_size:
-                code_chunk = self.binary_data[local_offset : local_offset + 64]
-                pseudo_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
-                lines.append(pseudo_c)
-
-        lines.append("")
-        self.check_and_print("\n".join(lines))        
-
     def print_hex_dump(self, args):
         size = 128
         if args:
@@ -202,6 +124,72 @@ class Runnow:
             lines.append(f"  {hex(line_vaddr)}  {hex_str.ljust(60)}  {ascii_str}")
         lines.append("-" * 75 + "\n")
         self.check_and_print("\n".join(lines))
+
+    def translate_bytes_to_c(self, chunk, start_vaddr):
+        c_lines = [f"Auto-Decompile Code Block at {hex(start_vaddr)} ---", "    {"]
+        last_cmp = ""
+        reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
+
+        for insn in self.cs.disasm(chunk, start_vaddr):
+            op = insn.op_str
+            for r, v in reg_map.items():
+                op = re.sub(rf'\b{r}\b', v, op)
+
+            if insn.mnemonic == "mov":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} = {parts[1].strip()};")
+            elif insn.mnemonic == "add":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} += {parts[1].strip()};")
+            elif insn.mnemonic == "sub":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")
+            elif insn.mnemonic == "xor":
+                parts = op.split(",")
+                if len(parts) == 2:
+                    if parts[0].strip() == parts[1].strip(): c_lines.append(f"        {parts[0].strip()} = 0;")
+                    else: c_lines.append(f"        {parts[0].strip()} ^= {parts[1].strip()};")
+            elif insn.mnemonic == "cmp":
+                last_cmp = op.replace(",", " == ")
+            elif insn.mnemonic == "je" and last_cmp:
+                c_lines.append(f"        if ({last_cmp}) {{ // branch")
+            elif insn.mnemonic == "jne" and last_cmp:
+                c_lines.append(f"        if (!({last_cmp})) {{ // branch")
+            elif insn.mnemonic == "call":
+                c_lines.append(f"        sub_{insn.op_str.strip()}();")
+            elif insn.mnemonic == "ret":
+                c_lines.append(f"        return local_res;")
+                break
+        c_lines.append("    }")
+        return "\n".join(c_lines)
+
+    def print_strings(self, args):
+        filter_keyword = args[0].lower() if args else None
+        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code Vectors..."]
+        matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
+
+        for match in matches:
+            raw_str = match.group().decode('ascii', errors='ignore')
+            if filter_keyword and filter_keyword not in raw_str.lower(): continue
+
+            offset = match.start()
+            vaddr = self.base_address + offset
+
+            color = GREEN
+            if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password", "flag{"]): color = RED
+            elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc", "main"]): color = CYAN
+
+            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
+            
+            local_offset = offset + len(match.group())
+            if local_offset + 64 <= self.file_size:
+                code_chunk = self.binary_data[local_offset : local_offset + 64]
+                pseudo_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
+                lines.append(pseudo_c)
+
+        lines.append("")
+        self.check_and_print("\n".join(lines))
+
     def find_xrefs(self):
         target_vaddr = self.base_address + self.cursor
         lines = [f"\n[INFO] Scanning XREFs for address: {hex(target_vaddr)}..."]
@@ -238,26 +226,6 @@ class Runnow:
         lines.append("")
         self.check_and_print("\n".join(lines))
 
-    def print_strings(self, args):
-        filter_keyword = args[0].lower() if args else None
-        lines = [f"\n[INFO] Extracting ASCII strings (Min length: 5)..."]
-        matches = re.finditer(b"[\\x20-\\x7E]{5,}", self.binary_data)
-
-        for match in matches:
-            raw_str = match.group().decode('ascii', errors='ignore')
-            if filter_keyword and filter_keyword not in raw_str.lower(): continue
-            offset = match.start()
-            vaddr = self.base_address + offset
-
-            if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password"]): 
-                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {RED}{raw_str}{RESET}")
-            elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc"]): 
-                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {CYAN}{raw_str}{RESET}")
-            else:
-                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {GREEN}{raw_str}{RESET}")
-        lines.append("")
-        self.check_and_print("\n".join(lines))
-
     def run_shell(self):
         filename = os.path.basename(self.filepath)
         print(f"[INFO] Loaded: {filename} ({self.file_size} bytes)")
@@ -266,7 +234,8 @@ class Runnow:
             try:
                 prompt = f"{BOLD}opet@{hex(self.cursor)}>{RESET} "
                 raw_input = input(prompt).strip()
-                if not raw_input: continue               
+                if not raw_input: continue
+
                 if raw_input.startswith("!"):
                     os.system(raw_input[1:])
                     continue
@@ -283,8 +252,7 @@ class Runnow:
                                  f"  px [bytes] : Hex-Dump view (Default: 128 bytes)\n"
                                  f"  ax         : Scan external XREFs call references\n"
                                  f"  ae         : Check file encryption using Shannon Entropy\n"
-                                 f"  asmd       : Automatic Decompilation of Machine Language into C Pseudo-Code\n"
-                                 f"  iz [filter]: Extract static ASCII strings from binary\n"
+                                 f"  iz [filter]: Extract static ASCII strings from binary + Enterprise Auto-C\n"
                                  f"  s <offset> : Seek cursor to target virtual address\n"
                                  f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help    : Show this commands list\n"
@@ -292,11 +260,6 @@ class Runnow:
                     self.check_and_print(help_text)
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
-                elif cmd == "asmd":
-                    chunk_to_decompile = self.binary_data[self.cursor : self.cursor + 500]
-                    virtual_target_addr = self.base_address + self.cursor                                       
-                    decompiler_instance = CapstoneDecompiler(chunk_to_decompile, virtual_target_addr)
-                    decompiler_instance.run_decompile()
                 elif cmd == "ax": self.find_xrefs()
                 elif cmd == "ae": self.analyze_entropy_map()
                 elif cmd == "iz": self.print_strings(args)
@@ -323,4 +286,3 @@ if __name__ == "__main__":
 
     engine = Runnow(sys.argv[1])
     engine.run_shell()
-                        
