@@ -7,6 +7,7 @@ try:
 except ImportError:
     print("[ERROR] The Package capstone not installed on your terminal, please install it by using pip install capstone.")
 sys.exit(1) 
+from capstone import *
 
 # Opet' v0.1.0
 # Copyright 2026 Skokoo
