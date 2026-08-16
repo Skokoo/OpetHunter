@@ -283,7 +283,9 @@ class Runnow:
                         vaddr_start = self.base_address + self.cursor                        
                         
                         decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
-                        pseudo_c = decompiler.run_decompile()                       self.check_and_print(pseudo_c)
+                        pseudo_c = decompiler.run_decompile()
+
+self.check_and_print(pseudo_c)
                     else:
                         print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
