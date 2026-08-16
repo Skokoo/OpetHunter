@@ -181,7 +181,7 @@ class PyR2GodMode:
         
         while True:
             try:
-                cmd_input = input(f"{BOLD}{WHITE}pyr2-god@{RESET}{RED}{hex(self.cursor)}{RESET}> ").strip().split()
+                cmd_input = input(f"{BOLD}{WHITE}Opet_v0.1.0@{RESET}{RED}{hex(self.cursor)}{RESET}> ").strip().split()
                 if not cmd_input: continue
                 
                 cmd = cmd_input[0]
