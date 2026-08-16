@@ -268,10 +268,10 @@ class Runnow:
                                  f"  ax         : Scan external XREFs call references\n"
                                  f"  ae         : Check file encryption using Shannon Entropy\n"
                                  f"  iz [filter]: Extract static ASCII strings from binary + Enterprise Auto-C\n"
+                                 f"  asmd [size]: Decompile assembly block at cursor to Pseudo-C (Default: 64 bytes)\n"
                                  f"  s <offset> : Seek cursor to target virtual address\n"
                                  f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
-                                 f"  h, help    : Show this commands list\n"
-                                 f"  q, exit    : Close the program\n")
+                                 f"  h, help    : Show this commands list\n"                                                                
                     self.check_and_print(help_text)
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
