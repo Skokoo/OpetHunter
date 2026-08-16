@@ -70,8 +70,8 @@ class Runnow:
             if ask != 'y':
                 print("[INFO] Printing canceled.")
                 return
-        print(out_str)
-    def print_disasm(self, args):
+        
+        def print_disasm(self, args):
         count = 15
         if args:
             try: count = int(args[0])
@@ -106,6 +106,70 @@ class Runnow:
             lines.append(f"  {WHITE}{hex(insn.address)}{RESET}\t{hex_bytes}\t{flow_line}\t{mnemonic_colored} {op_str_colored}")
         lines.append("-" * 85 + "\n")
         self.check_and_print("\n".join(lines))
+
+    def translate_bytes_to_c(self, chunk, start_vaddr):       
+        c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
+        last_cmp = ""
+        reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
+
+        for insn in self.cs.disasm(chunk, start_vaddr):
+            op = insn.op_str
+            for r, v in reg_map.items():
+                op = re.sub(rf'\b{r}\b', v, op)
+
+            if insn.mnemonic == "mov":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} = {parts[1].strip()};")
+            elif insn.mnemonic == "add":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} += {parts[1].strip()};")
+            elif insn.mnemonic == "sub":
+                parts = op.split(",")
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")
+            elif insn.mnemonic == "xor":
+                parts = op.split(",")
+                if len(parts) == 2:
+                    if parts[0].strip() == parts[1].strip(): c_lines.append(f"        {parts[0].strip()} = 0;")
+                    else: c_lines.append(f"        {parts[0].strip()} ^= {parts[1].strip()};")
+            elif insn.mnemonic == "cmp":
+                last_cmp = op.replace(",", " ==")
+            elif insn.mnemonic == "je" and last_cmp:
+                c_lines.append(f"        if ({last_cmp}) {{ // branch")
+            elif insn.mnemonic == "jne" and last_cmp:
+                c_lines.append(f"        if (!({last_cmp})) {{ // branch")
+            elif insn.mnemonic == "call":
+                c_lines.append(f"        sub_{insn.op_str.strip()}();")
+            elif insn.mnemonic == "ret":
+                c_lines.append(f"        return local_res;")
+                break
+        c_lines.append("    }")
+        return "\n".join(c_lines)
+
+    def print_strings(self, args):        
+        filter_keyword = args[0].lower() if args else None
+        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]
+        matches = re.finditer(b"[\\x20-\\x7E]{5,}", self.binary_data)
+
+        for match in matches:
+            raw_str = match.group().decode('ascii', errors='ignore')
+            if filter_keyword and filter_keyword not in raw_str.lower(): continue
+
+            offset = match.start()
+            vaddr = self.base_address + offset            
+            color = GREEN
+            if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password", "flag{"]): color = RED
+            elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc", "main"]): color = CYAN
+
+            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")           
+            
+            local_offset = offset + len(match.group())
+            if local_offset + 64 <= self.file_size:
+                code_chunk = self.binary_data[local_offset : local_offset + 64]
+                pseudo_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
+                lines.append(pseudo_c)
+
+        lines.append("")
+        self.check_and_print("\n".join(lines))        
 
     def print_hex_dump(self, args):
         size = 128
