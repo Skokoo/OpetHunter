@@ -272,7 +272,8 @@ class Runnow:
                                  f"  s <offset> : Seek cursor to target virtual address\n"
                                  f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help    : Show this commands list\n"                                                                
-                    self.check_and_print(help_text)
+)
+                   self.check_and_print(help_text)
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
                 elif cmd == "ax": self.find_xrefs()
