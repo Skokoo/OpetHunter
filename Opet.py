@@ -4,6 +4,16 @@ import re
 import math
 from capstone import *
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+dec_folder_path = os.path.join(current_dir, "DEC")
+if dec_folder_path not in sys.path:
+    sys.path.insert(0, dec_folder_path)
+try:
+    from CDec import CapstoneDecompiler
+except ImportError:
+    print(f"[ERROR*] File CDec.py not found on dir: {dec_folder_path}")
+    sys.exit(1)
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
@@ -217,6 +227,11 @@ class Runnow:
                     self.check_and_print(help_text)
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
+                elif cmd == "asmd":
+                    chunk_to_decompile = self.binary_data[self.cursor : self.cursor + 500]
+                    virtual_target_addr = self.base_address + self.cursor                                       
+                    decompiler_instance = CapstoneDecompiler(chunk_to_decompile, virtual_target_addr)
+                    decompiler_instance.run_decompile()
                 elif cmd == "ax": self.find_xrefs()
                 elif cmd == "ae": self.analyze_entropy_map()
                 elif cmd == "iz": self.print_strings(args)
