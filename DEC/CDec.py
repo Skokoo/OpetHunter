@@ -1,6 +1,10 @@
 import re
 from capstone import *
 
+# Opet' v0.1.0
+# Copyright 2026 Skokoo
+# Licensed under the Apache License, Version 2.0
+
 class CapstoneDecompiler:
     def __init__(self, binary_bytes, base_address):
         self.binary_data = binary_bytes
@@ -29,8 +33,7 @@ class CapstoneDecompiler:
 
             if not in_function and i == 0:
                 func_counter += 1
-                in_function = True
-                print(f"// Entry Point")
+                in_function = True                
                 print(f"void entry_point() {{")
 
             clean_op = insn.op_str.replace("qword ptr", "").replace("dword ptr", "").replace("byte ptr", "").strip()
