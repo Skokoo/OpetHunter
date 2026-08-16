@@ -12,7 +12,7 @@ if dec_folder_path not in sys.path:
 try:
     from CDec import CapstoneDecompiler
 except ImportError:
-    print(f"[ERROR] The file "CDec.py" NOT found IN dir: {dec_folder_path}")
+    print(f"[ERROR] The file 'CDec.py' NOT found IN dir: {dec_folder_path}")
     sys.exit(1)
 
 RESET   = "\033[0m"
