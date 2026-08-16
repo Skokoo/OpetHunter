@@ -106,7 +106,7 @@ class PyR2GodMode:
 
             for idx, b in enumerate(sub_chunk):
                 if idx == 8: hex_str += " "
-                
+
                 if b == 0x00:
                     hex_str += f"{WHITE}{b:02x}{RESET} "
                     ascii_str += f"{WHITE}.{RESET}"
@@ -181,8 +181,7 @@ class PyR2GodMode:
     def run_shell(self):
         filename = os.path.basename(self.filepath)
         print(f"[+] Loaded: {filename} ({self.file_size} bytes)")
-        print(f"[+] Type 'h' or 'help' to display available commands.\n")
-        
+
         while True:
             try:
                 prompt = f"{BOLD}opet@{hex(self.cursor)}>{RESET} "
