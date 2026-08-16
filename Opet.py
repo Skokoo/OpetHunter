@@ -49,6 +49,14 @@ class Runnow:
             entropy -= p * math.log2(p)
         return entropy
 
+    def check_and_print(self, out_str):
+        char_count = len(out_str)
+        if char_count > 1500:
+            ask = input(f"Do you want to print {char_count} characters? (y/n): ").strip().lower()
+            if ask != 'y':
+                print("[INFO] Printing canceled.")
+                return
+        print(out_str)
     def print_disasm(self, args):
         count = 15
         if args:
@@ -58,9 +66,7 @@ class Runnow:
         chunk = self.binary_data[self.cursor : self.cursor + (count * 15)]
         vaddr_start = self.base_address + self.cursor
 
-        print(f"\n[INFO*] Disassembly at {hex(vaddr_start)}")
-        print(f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}")
-        print("-" * 85)
+        lines = [f"\n[INFO*] Disassembly at {hex(vaddr_start)}", f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}", "-" * 85]
         for insn in self.cs.disasm(chunk, vaddr_start):
             hex_bytes = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
 
@@ -83,8 +89,9 @@ class Runnow:
             elif insn.mnemonic in ['xor', 'sub', 'add', 'cmp']:
                 mnemonic_colored = f"{GREEN}{insn.mnemonic}{RESET}"
 
-            print(f"  {WHITE}{hex(insn.address)}{RESET}\t{hex_bytes}\t{flow_line}\t{mnemonic_colored} {op_str_colored}")
-        print("-" * 85 + "\n")
+            lines.append(f"  {WHITE}{hex(insn.address)}{RESET}\t{hex_bytes}\t{flow_line}\t{mnemonic_colored} {op_str_colored}")
+        lines.append("-" * 85 + "\n")
+        self.check_and_print("\n".join(lines))
 
     def print_hex_dump(self, args):
         size = 128
@@ -95,10 +102,7 @@ class Runnow:
         chunk = self.binary_data[self.cursor : self.cursor + size]
         vaddr_start = self.base_address + self.cursor
 
-        print(f"\n[INFO] Hex Dump at {hex(vaddr_start)}")
-        print(f"  Offset      00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f   ASCII")
-        print("-" * 75)
-
+        lines = [f"\n[INFO] Hex Dump at {hex(vaddr_start)}", f"  Offset      00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f   ASCII", "-" * 75]
         for i in range(0, len(chunk), 16):
             sub_chunk = chunk[i:i+16]
             hex_str = ""
@@ -106,7 +110,6 @@ class Runnow:
 
             for idx, b in enumerate(sub_chunk):
                 if idx == 8: hex_str += " "
-
                 if b == 0x00:
                     hex_str += f"{WHITE}{b:02x}{RESET} "
                     ascii_str += f"{WHITE}.{RESET}"
@@ -118,65 +121,64 @@ class Runnow:
                     ascii_str += f"{RED}.{RESET}"
 
             line_vaddr = vaddr_start + i
-            print(f"  {hex(line_vaddr)}  {hex_str.ljust(60)}  {ascii_str}")
-        print("-" * 75 + "\n")
-
+            lines.append(f"  {hex(line_vaddr)}  {hex_str.ljust(60)}  {ascii_str}")
+        lines.append("-" * 75 + "\n")
+        self.check_and_print("\n".join(lines))
     def find_xrefs(self):
         target_vaddr = self.base_address + self.cursor
-        print(f"\n[INFO] Scanning XREFs for address: {hex(target_vaddr)}...")
+        lines = [f"\n[INFO] Scanning XREFs for address: {hex(target_vaddr)}..."]
         found_xrefs = 0
 
         for insn in self.cs.disasm(self.binary_data, self.base_address):
             if insn.mnemonic.startswith('j') or insn.mnemonic == 'call':
                 if hex(target_vaddr) in insn.op_str:
-                    print(f"  {GREEN}[XREF]{RESET} Found at {hex(insn.address)} -> ({insn.mnemonic} {insn.op_str})")
+                    lines.append(f"  {GREEN}[XREF]{RESET} Found at {hex(insn.address)} -> ({insn.mnemonic} {insn.op_str})")
                     found_xrefs += 1
 
         if found_xrefs == 0:
-            print("[ERROR] No external XREFs found for this address.")
-        print()
+            lines.append("[ERROR] No external XREFs found for this address.")
+        lines.append("")
+        self.check_and_print("\n".join(lines))
 
     def analyze_entropy_map(self):
-        print(f"\n[INFO] Shannon Entropy Analysis")
+        lines = [f"\n[INFO] Shannon Entropy Analysis", "Block\tVirtual Addr\tScore\t\tStatus / Graph", "-" * 75]
         block_size = 512
-        print("Block\tVirtual Addr\tScore\t\tStatus / Graph")
-        print("-" * 75)
 
         for i in range(0, self.file_size, block_size):
             block = self.binary_data[i:i+block_size]
             entropy = self.calculate_entropy(block)
-
             bar_len = int(entropy * 4)
             chart = "█" * bar_len
-
             vaddr = self.base_address + i
+            
             if entropy > 6.5:   
-                print(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{RED}{BOLD}[PACKED] {RESET} {RED}{chart}{RESET}")
+                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{RED}{BOLD}[PACKED] {RESET} {RED}{chart}{RESET}")
             elif entropy > 4.5: 
-                print(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{YELLOW}[CODE]   {RESET} {YELLOW}{chart}{RESET}")
+                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{YELLOW}[CODE]   {RESET} {YELLOW}{chart}{RESET}")
             else:               
-                print(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{GREEN}[DATA]   {RESET} {GREEN}{chart}{RESET}")
-        print()
+                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{GREEN}[DATA]   {RESET} {GREEN}{chart}{RESET}")
+        lines.append("")
+        self.check_and_print("\n".join(lines))
 
     def print_strings(self, args):
         filter_keyword = args[0].lower() if args else None
-        print(f"\n[INFO] Extracting ASCII strings (Min length: 5)...")
+        lines = [f"\n[INFO] Extracting ASCII strings (Min length: 5)..."]
         matches = re.finditer(b"[\\x20-\\x7E]{5,}", self.binary_data)
 
         for match in matches:
             raw_str = match.group().decode('ascii', errors='ignore')
             if filter_keyword and filter_keyword not in raw_str.lower(): continue
-
             offset = match.start()
             vaddr = self.base_address + offset
 
             if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password"]): 
-                print(f"  {hex(offset)}\t{hex(vaddr)}\t-> {RED}{raw_str}{RESET}")
+                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {RED}{raw_str}{RESET}")
             elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc"]): 
-                print(f"  {hex(offset)}\t{hex(vaddr)}\t-> {CYAN}{raw_str}{RESET}")
+                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {CYAN}{raw_str}{RESET}")
             else:
-                print(f"  {hex(offset)}\t{hex(vaddr)}\t-> {GREEN}{raw_str}{RESET}")
-        print()
+                lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {GREEN}{raw_str}{RESET}")
+        lines.append("")
+        self.check_and_print("\n".join(lines))
 
     def run_shell(self):
         filename = os.path.basename(self.filepath)
@@ -185,24 +187,30 @@ class Runnow:
         while True:
             try:
                 prompt = f"{BOLD}opet@{hex(self.cursor)}>{RESET} "
-                cmd_input = input(prompt).strip().split()
-                if not cmd_input: continue
+                raw_input = input(prompt).strip()
+                if not raw_input: continue               
+                if raw_input.startswith("!"):
+                    os.system(raw_input[1:])
+                    continue
 
+                cmd_input = raw_input.split()
                 cmd = cmd_input[0].lower()
                 args = cmd_input[1:] if len(cmd_input) > 1 else None
 
                 if cmd in ["q", "exit"]: 
                     break
                 elif cmd in ["h", "help", "?"]:
-                    print(f"\n{BOLD}Available Commands:{RESET}")
-                    print(f"  pd [lines] : Disassembly view (Default: 15 lines)")
-                    print(f"  px [bytes] : Hex-Dump view (Default: 128 bytes)")
-                    print(f"  ax         : Scan external XREFs call references")
-                    print(f"  ae         : Check file encryption using Shannon Entropy")
-                    print(f"  iz [filter]: Extract static ASCII strings from binary")
-                    print(f"  s <offset> : Seek cursor to target virtual address")
-                    print(f"  h, help    : Show this commands list")
-                    print(f"  q, exit    : Close the program\n")
+                    help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
+                                 f"  pd [lines] : Disassembly view (Default: 15 lines)\n"
+                                 f"  px [bytes] : Hex-Dump view (Default: 128 bytes)\n"
+                                 f"  ax         : Scan external XREFs call references\n"
+                                 f"  ae         : Check file encryption using Shannon Entropy\n"
+                                 f"  iz [filter]: Extract static ASCII strings from binary\n"
+                                 f"  s <offset> : Seek cursor to target virtual address\n"
+                                 f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
+                                 f"  h, help    : Show this commands list\n"
+                                 f"  q, exit    : Close the program\n")
+                    self.check_and_print(help_text)
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
                 elif cmd == "ax": self.find_xrefs()
@@ -231,3 +239,4 @@ if __name__ == "__main__":
 
     engine = Runnow(sys.argv[1])
     engine.run_shell()
+                        
