@@ -14,6 +14,10 @@ MAGENTA = "\033[95m"
 CYAN    = "\033[96m"
 WHITE   = "\033[97m"
 
+# Opet' v0.1.0
+# Copyright 2026 Skokoo
+# Licensed under the Apache License, Version 2.0
+
 class Runnow:
     def __init__(self, filepath):
         self.filepath = filepath
