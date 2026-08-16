@@ -9,7 +9,7 @@ BOLD    = "\033[1m"
 RED     = "\033[91m"
 GREEN   = "\033[92m"
 YELLOW  = "\033[93m"
-BLUE    = "\033[94m"
+BLUE    = "\033[34m"
 MAGENTA = "\033[95m"
 CYAN    = "\033[96m"
 WHITE   = "\033[97m"
@@ -121,13 +121,13 @@ class PyR2GodMode:
 
     def find_xrefs(self):        
         target_vaddr = self.base_address + self.cursor
-        print(f"\n[*] Memulai Scanning XREFs menuju alamat virtual: {BOLD}{YELLOW}{hex(target_vaddr)}{RESET}...")
+        print(f"\n[INFO] Starting XREFs Scanning towards virtual address: {BOLD}{YELLOW}{hex(target_vaddr)}{RESET}...")
         found_xrefs = 0
             
         for insn in self.cs.disasm(self.binary_data, self.base_address):            
             if insn.mnemonic.startswith('j') or insn.mnemonic == 'call':
                 if hex(target_vaddr) in insn.op_str:
-                    print(f"{GREEN}[XREF FOUND]{RESET} Called by {BOLD}{CYAN}{hex(insn.address)}{RESET} ➔ ({insn.mnemonic} {insn.op_str})")
+                    print(f"{GREEN}[XREF FOUND]{RESET} Called by {BOLD}{CYAN}{hex(insn.address)}{RESET} -> ({insn.mnemonic} {insn.op_str})")
                     found_xrefs += 1
                     
         if found_xrefs == 0:
@@ -148,8 +148,8 @@ class PyR2GodMode:
             chart = "█" * bar_len
             
             if entropy > 6.5:   color = f"{RED}{BOLD}[ENCRYPTED/PACKED]{RESET} {RED}"
-            elif entropy > 4.5: color = f"{YELLOW}[CODE SECTION]   {RESET} {BOLD}"
-            else:               color = f"{GREEN}[TEXT/DATA]      {RESET} {BOLD}"
+            elif entropy > 4.5: color = f"{YELLOW}[CODE SECTION]   {RESET} {YELLOW}"
+            else:               color = f"{GREEN}[TEXT/DATA]      {RESET} {GREEN}"
             
             vaddr = self.base_address + i
             print(f"Block #{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{color}{chart}{RESET}")
@@ -171,12 +171,12 @@ class PyR2GodMode:
             if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password"]): color = RED
             elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc"]): color = CYAN
             
-            print(f"  {hex(offset)}\t{hex(vaddr)}\t➔ {color}{raw_str}{RESET}")
+            print(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
         print()
 
     def run_shell(self):
         filename = os.path.basename(self.filepath)        
-        print(f"[INFO] Target Loaded: {BOLD}{YELLOW}{filename}{RESET} ({self.file_size} bytes)")
+        print(f"[INFO] Target Loaded: {BOLD}{BLUE}{filename}{RESET} ({self.file_size} bytes)")
         print(f"[INFO] Commands: [{BOLD}pd (Disasm), px (Hex-Dump), ax (XREFs), ae (Entropy Map), iz (Strings), s (Seek), q (Exit){RESET}]\n")
         
         while True:
