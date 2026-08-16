@@ -4,6 +4,10 @@ import re
 import math
 from capstone import *
 
+# Opet' v0.1.0
+# Copyright 2026 Skokoo
+# Licensed under the Apache License, Version 2.0
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
 dec_folder_path = os.path.join(current_dir, "DEC")
 
