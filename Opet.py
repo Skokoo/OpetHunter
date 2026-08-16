@@ -219,6 +219,7 @@ class Runnow:
                                  f"  px [bytes] : Hex-Dump view (Default: 128 bytes)\n"
                                  f"  ax         : Scan external XREFs call references\n"
                                  f"  ae         : Check file encryption using Shannon Entropy\n"
+                                 f"  asmd       : Automatic Decompilation of Machine Language into C Pseudo-Code\n"
                                  f"  iz [filter]: Extract static ASCII strings from binary\n"
                                  f"  s <offset> : Seek cursor to target virtual address\n"
                                  f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
