@@ -4,6 +4,17 @@ import re
 import math
 from capstone import *
 
+current_dir = os.path.dirname(os.path.abspath(__file__))
+dec_folder_path = os.path.join(current_dir, "DEC")
+
+if dec_folder_path not in sys.path:
+    sys.path.insert(0, dec_folder_path)
+try:
+    from CDec import CapstoneDecompiler
+except ImportError:
+    print(f"[ERROR] The file "CDec.py" NOT found IN dir: {dec_folder_path}")
+    sys.exit(1)
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
@@ -261,6 +272,20 @@ class Runnow:
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
                 elif cmd == "ax": self.find_xrefs()
+                elif cmd == "asmd":                    
+                    chunk_size = 64
+                    if args:
+                        try: chunk_size = int(args[0])
+                        except: pass
+                        
+                    if self.cursor + chunk_size <= self.file_size:
+                        code_chunk = self.binary_data[self.cursor : self.cursor + chunk_size]
+                        vaddr_start = self.base_address + self.cursor                        
+                        
+                        decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
+                        pseudo_c = decompiler.run_decompile()                       self.check_and_print(pseudo_c)
+                    else:
+                        print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
                 elif cmd == "iz": self.print_strings(args)
                 elif cmd == "s" and args:
@@ -275,8 +300,7 @@ class Runnow:
                         print("[WARNING] Invalid address format.")
                 else:
                     print("[WARNING] Unknown command. Type 'help' for options.")
-            except (KeyboardInterrupt, EOFError):
-                print("\n[INFO] Exiting...")
+            except (KeyboardInterrupt, EOFError):                
                 break
 
 if __name__ == "__main__":
