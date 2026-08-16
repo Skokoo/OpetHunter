@@ -276,7 +276,8 @@ class Runnow:
                     chunk_size = 64
                     if args:
                         try: chunk_size = int(args[0])
-                        except: pass
+                        except: 
+                            pass
                         
                     if self.cursor + chunk_size <= self.file_size:
                         code_chunk = self.binary_data[self.cursor : self.cursor + chunk_size]
@@ -284,7 +285,7 @@ class Runnow:
                         
                         decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
                         pseudo_c = decompiler.run_decompile()
-                      self.check_and_print(pseudo_c)
+                       self.check_and_print(pseudo_c)
                     else:
                         print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
