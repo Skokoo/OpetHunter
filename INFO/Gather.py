@@ -95,7 +95,7 @@ class BinaryGatherer:
         if sec:
             res.append("[WARNING] Alerts/Protections:")
             for x in sec:
-                res.append(f"-> \033[91m\033[1m{x}\033[0m")
+                res.append(f"-> \033[1m{x}\033[0m")
         else:
             res.append("[INFO] Alerts/Protections: None (Clean ASM)")
 
