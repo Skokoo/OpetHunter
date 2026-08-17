@@ -325,6 +325,7 @@ class Runnow:
                 cmd_input = raw_input.split()
                 cmd = cmd_input[0].lower()
                 args = cmd_input[1:] if len(cmd_input) > 1 else None
+                self.last_args = args
 
                 if cmd in ["q", "exit"]: 
                     break
