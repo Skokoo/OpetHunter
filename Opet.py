@@ -304,9 +304,11 @@ class Runnow:
             if local_offset + 64 <= self.file_size:
                 code_chunk = self.binary_data[local_offset : local_offset + 64]
                 raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
-                             
-                if raw_c.count("+=") < 3 and raw_c.count("byte ptr") < 3 and raw_c.count("ch") < 3:
-                    pseudo_c = raw_c           
+                                                            
+                bad_vectors = ("+=", "byte ptr", "fs:", "gs:", "ss:", "ch", "dh", "bh")                
+                
+                if not any(vec in raw_c for vec in bad_vectors):
+                    pseudo_c = raw_c                            
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
             if pseudo_c and "{" in pseudo_c:
                 lines.append(pseudo_c)
