@@ -307,7 +307,7 @@ class Runnow:
                 code_chunk = self.binary_data[local_offset : local_offset + 64]
                 raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
                                
-                bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah")
+                bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
                 if raw_c and "{" in raw_c and not any(sig in raw_c for sig in bad_signals):
                     pseudo_c = raw_c
 
