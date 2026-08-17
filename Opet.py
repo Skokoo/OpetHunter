@@ -265,7 +265,7 @@ class Runnow:
 
     def print_strings(self, args):        
         filter_keyword = None
-       if args and isinstance(args, list) and len(args) > 0:
+        if args and isinstance(args, list) and len(args) > 0:
             first_arg = str(args[0]).strip()           
             if not first_arg.startswith("-"):
                 filter_keyword = first_arg.lower()
