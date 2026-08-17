@@ -1,0 +1,24 @@
+{
+  "architecture": "x86_64",
+  "registers": {
+    "rax": {"clean_name": "local_res", "bits": 64, "purpose": "Accumulator / Return Value"},
+    "eax": {"clean_name": "local_res_32", "bits": 32, "purpose": "32-bit Accumulator"},
+    "ax":  {"clean_name": "local_res_16", "bits": 16, "purpose": "16-bit Accumulator"},
+    "al":  {"clean_name": "local_res_8", "bits": 8, "purpose": "8-bit Accumulator"},
+    
+    "rdi": {"clean_name": "param_1", "bits": 64, "purpose": "1st Argument"},
+    "edi": {"clean_name": "param_1_32", "bits": 32, "purpose": "32-bit 1st Argument"},
+    
+    "rsi": {"clean_name": "param_2", "bits": 64, "purpose": "2nd Argument"},
+    "esi": {"clean_name": "param_2_32", "bits": 32, "purpose": "32-bit 2nd Argument"},
+    
+    "rdx": {"clean_name": "param_3", "bits": 64, "purpose": "3rd Argument"},
+    "edx": {"clean_name": "param_3_32", "bits": 32, "purpose": "32-bit 3rd Argument"},
+    
+    "rcx": {"clean_name": "param_4", "bits": 64, "purpose": "4th Argument"},
+    "ecx": {"clean_name": "param_4_32", "bits": 32, "purpose": "32-bit 4th Argument"},
+    
+    "r8":  {"clean_name": "param_5", "bits": 64, "purpose": "5th Argument"},
+    "r9":  {"clean_name": "param_6", "bits": 64, "purpose": "6th Argument"}
+  }
+}
