@@ -31,14 +31,18 @@ class InfoValidator:
 
         for line in lines:           
             if "Format :" in line and is_text:
-                line = "* Format : Plain Text File (False Binary Mask Detected!)"
+                line = "  * Format : Plain Text File (False Binary Mask Detected!)"
             if "Comp   :" in line and is_text:
-                line = "* Comp   : None (Text match only, not compiled)"
+                line = "  * Comp   : None (Text match only, not compiled)"
             if "Linker :" in line and is_text:
-                line = "* Linker : None"                
-            
+                line = "  * Linker : None"                
+            if "Lang   :" in line and is_text:
+                line = "  * Lang   : None (Plain Text)"
+            if "Target :" in line and is_text:
+                line = "  * Target : None"
+
             if "UPX" in line and not is_text:
-                line = line.replace("UPX", "\033[1m* UPX\033[0m")
+                line = line.replace("UPX", "\033[91m\033[1m[CRITICAL] UPX\033[0m")
 
             buffed.append(line)
 
@@ -49,4 +53,3 @@ class InfoValidator:
         raw_rep = gatherer.run_gather()
         final_rep = self.eval_report(raw_rep)
         return final_rep
-
