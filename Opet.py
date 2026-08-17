@@ -298,20 +298,19 @@ class Runnow:
             elif any(x in raw_str.lower() for x in tuple(("debug", "assert", "gcc", "main"))): 
                 color = CYAN
 
-            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
-
             local_offset = offset + len(match.group())
             pseudo_c = ""
             
             if local_offset + 64 <= self.file_size:
                 code_chunk = self.binary_data[local_offset : local_offset + 64]
                 raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
-                               
+                
                 bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
-                if raw_c and "{" in raw_c and not any(sig in raw_c for sig in bad_signals):
+                if raw_c and "{" in raw_c and not any(sig in raw_c.lower() for sig in bad_signals):
                     pseudo_c = raw_c
 
-            if pseudo_c and len(pseudo_c.strip()) > 15:
+            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
+            if pseudo_c and "{" in pseudo_c and len(pseudo_c.strip().split("\n")) > 2:
                 lines.append(pseudo_c)
 
         lines.append("")
