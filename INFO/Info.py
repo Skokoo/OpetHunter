@@ -19,7 +19,8 @@ class InfoValidator:
         is_text = False
         try:            
             sample = self.raw[:500]
-            printable = sum(1 for x in sample if 32 <= x <= 126 or x in)
+            whitelist_bytes = tuple((9, 10, 13))
+            printable = sum(1 for x in sample if 32 <= x <= 126 or x in whitelist_bytes)
             if len(sample) > 0 and (printable / len(sample)) > 0.9:
                 is_text = True
         except:
