@@ -301,18 +301,15 @@ class Runnow:
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
             
             found_xref_vaddr = None
+            target_hex1 = hex(vaddr)
+            target_hex2 = hex(vaddr)[2:] # Format tanpa 0x untuk jaga-jaga
+            
             try:
-                search_limit = min(0x4000, len(self.binary_data))
-                code_area = bytes(self.binary_data[:search_limit])
-                for insn in self.cs.disasm(code_area, self.base_address):
-                    if hex(vaddr) in insn.op_str:                   
+                # Sisir seluruh biner tanpa batasan agar XREF tidak terlewat
+                for insn in self.cs.disasm(bytes(self.binary_data), self.base_address):
+                    if target_hex1 in insn.op_str or target_hex2 in insn.op_str:
                         found_xref_vaddr = insn.address
                         break
-                    if insn.mnemonic in ["adr", "adrp"] and insn.op_str:
-                        match_hex = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
-                        if match_hex and int(match_hex.group(), 16) == vaddr:
-                            found_xref_vaddr = insn.address
-                            break
             except:
                 pass
 
@@ -321,8 +318,8 @@ class Runnow:
                 if code_offset + 64 <= self.file_size:
                     code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
                     pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
-                    if "{" in pseudo_c and "+=" not in pseudo_c:
-                        lines.append(f"    //  Auto-C XREF Triggered at {hex(found_xref_vaddr)}")
+                    if "{" in pseudo_c:
+                        lines.append(f"    // Enterprise Auto-C XREF at {hex(found_xref_vaddr)}")
                         lines.append(pseudo_c)            
 
         lines.append("")
