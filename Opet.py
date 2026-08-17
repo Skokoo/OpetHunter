@@ -86,6 +86,7 @@ class Runnow:
             p = count / len(data)
             entropy -= p * math.log2(p)
         return entropy
+
     def check_and_print(self, out_str):
         if out_str is None or not isinstance(out_str, str):
             print("[INFO] Decompiler returned no text or empty block.")
@@ -247,8 +248,11 @@ class Runnow:
         return "\n".join(c_lines)
 
     def print_strings(self, args):
-        filter_keyword = args[0].lower() if args else None
-        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]
+        filter_keyword = None
+        if args and not args[0].startswith("-"):           
+        filter_keyword = args[0].lower() 
+
+        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code."]
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
 
         for match in matches:
@@ -281,7 +285,7 @@ class Runnow:
         for insn in self.cs.disasm(self.binary_data, self.base_address):
             if insn.mnemonic.startswith('j') or insn.mnemonic == 'call':
                 if hex(target_vaddr) in insn.op_str:
-                    lines.append(f"  {GREEN}[XREF]{RESET} Found at {hex(insn.address)} -> ({insn.mnemonic} {insn.op_str})")
+                    lines.append(f"  [XREF] Found at {hex(insn.address)} -> ({insn.mnemonic} {insn.op_str})")
                     found_xrefs += 1
 
         if found_xrefs == 0:
