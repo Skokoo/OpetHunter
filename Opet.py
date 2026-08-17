@@ -271,7 +271,7 @@ class Runnow:
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
         
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
-       elf_sections = (".fini_array", ".init_array", ".text", ".data", ".rodata", 
+        elf_sections = (".fini_array", ".init_array", ".text", ".data", ".rodata", 
                         ".comment", ".note", ".got", ".rela", ".dynstr", ".dynsym", 
                         ".eh_frame", ".gnu", ".symtab", ".strtab", ".shstrtab")
 
