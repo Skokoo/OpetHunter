@@ -222,39 +222,44 @@ class Runnow:
 
     def translate_bytes_to_c(self, chunk, start_vaddr):
         c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
-        last_cmp = ""
-        reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
+        last_cmp = ""      
+        
+        if hasattr(self, 'arch_type') and self.arch_type == "aarch64":
+            reg_map = {"x0": "arg1", "x1": "arg2", "x2": "arg3", "x3": "arg4", "w0": "arg1_32"}
+        else:
+            reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
 
         for insn in self.cs.disasm(chunk, start_vaddr):
             op = insn.op_str
             for r, v in reg_map.items():
-                op = re.sub(rf'\b{r}\b', v, op)
-
-            if insn.mnemonic == "mov":
+                op = re.sub(rf'\b{r}\b', v, op)          
+            if insn.mnemonic in ["mov", "ldr", "str", "movz"]:
                 parts = op.split(",")
                 if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} = {parts[1].strip()};")
             elif insn.mnemonic == "add":
                 parts = op.split(",")
                 if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} += {parts[1].strip()};")
-            elif insn.mnemonic == "sub":
+            elif insn.mnemonic in ["sub", "subs"]:
                 parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")
-            elif insn.mnemonic == "xor":
+                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")           
+            elif insn.mnemonic in ["xor", "eor"]:
                 parts = op.split(",")
                 if len(parts) == 2:
                     if parts[0].strip() == parts[1].strip(): c_lines.append(f"        {parts[0].strip()} = 0;")
                     else: c_lines.append(f"        {parts[0].strip()} ^= {parts[1].strip()};")
             elif insn.mnemonic == "cmp":
-                last_cmp = op.replace(",", " == ")
-            elif insn.mnemonic == "je" and last_cmp:
+                last_cmp = op.replace(",", " == ")           
+            elif insn.mnemonic in ["je", "b.eq"] and last_cmp:
                 c_lines.append(f"        if ({last_cmp}) {{ // branch")
-            elif insn.mnemonic == "jne" and last_cmp:
-                c_lines.append(f"        if (!({last_cmp})) {{ // branch")
-            elif insn.mnemonic == "call":
+            elif insn.mnemonic in ["jne", "b.ne"] and last_cmp:
+                c_lines.append(f"        if (!({last_cmp})) {{ // branch")            
+            elif insn.mnemonic in ["call", "bl", "blr"]:
                 c_lines.append(f"        sub_{insn.op_str.strip()}();")
-            elif insn.mnemonic == "ret":
-                c_lines.append(f"        return local_res;")
+            elif insn.mnemonic in ["ret", "hlt"]:               
+                ret_val = "arg1" if (hasattr(self, 'arch_type') and self.arch_type == "aarch64") else "local_res"
+                c_lines.append(f"        return {ret_val};")
                 break
+                
         c_lines.append("    }")
         return "\n".join(c_lines)
 
