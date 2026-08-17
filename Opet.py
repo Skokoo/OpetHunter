@@ -120,6 +120,12 @@ class Runnow:
             lines.append(f"  {WHITE}{hex(insn.address)}{RESET}\t{hex_bytes}\t{flow_line}\t{mnemonic_colored} {op_str_colored}")
         lines.append("-" * 85 + "\n")
         self.check_and_print("\n".join(lines))
+  
+    def run_pipeline(self):       
+        gatherer = BinaryGatherer(self.raw)
+        raw_rep = gatherer.run_gather()
+        final_rep = self.eval_report(raw_rep)
+        return final_rep
 
     def print_hex_dump(self, args):
         size = 128
