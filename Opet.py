@@ -57,6 +57,7 @@ class Runnow:
         self.filepath = filepath
         self.cursor = 0x0
         self.base_address = 0x10000000
+        self.last_args = None
 
         try:
             with open(filepath, "rb") as f:
@@ -65,11 +66,21 @@ class Runnow:
         except Exception as e:
             print(f"[WARNING*] Error reading file: {e}")
             sys.exit(1)
+        
+        self.arch_type = "x86_64"
+        if self.file_size > 0x12:           
+            if self.binary_data[0x12] == 0x28:
+                self.arch_type = "aarch64"
+       
+        if self.arch_type == "aarch64":
+            self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM) 
+        else:
+            self.cs = Cs(CS_ARCH_X86, CS_MODE_64)    
 
-        self.cs = Cs(CS_ARCH_X86, CS_MODE_64)
-        self.cs.detail = True
-        self.auto_detect_entry_point()
-
+        self.cs.detail = True               
+        idx = self.binary_data.find(b"\x55\x48\x89\xE5")
+        self.cursor = idx if idx != -1 else 0x0   
+       
     def auto_detect_entry_point(self):
         pattern = b"\x55\x48\x89\xE5"
         idx = self.binary_data.find(pattern)
