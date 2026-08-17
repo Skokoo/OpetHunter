@@ -297,21 +297,33 @@ class Runnow:
                 color = RED
             elif any(x in raw_str.lower() for x in tuple(("debug", "assert", "gcc", "main"))): 
                 color = CYAN
-            
-            local_offset = offset + len(match.group())
-            pseudo_c = ""
-            
-            if local_offset + 64 <= self.file_size:
-                code_chunk = self.binary_data[local_offset : local_offset + 64]
-                raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
-                                                            
-                bad_vectors = ("+=", "byte ptr", "fs:", "gs:", "ss:", "ch", "dh", "bh")                
-                
-                if not any(vec in raw_c for vec in bad_vectors):
-                    pseudo_c = raw_c                            
+
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
-            if pseudo_c and "{" in pseudo_c:
-                lines.append(pseudo_c)
+            
+            found_xref_vaddr = None
+            try:
+                search_limit = min(0x4000, len(self.binary_data))
+                code_area = bytes(self.binary_data[:search_limit])
+                for insn in self.cs.disasm(code_area, self.base_address):
+                    if hex(vaddr) in insn.op_str:                   
+                        found_xref_vaddr = insn.address
+                        break
+                    if insn.mnemonic in ["adr", "adrp"] and insn.op_str:
+                        match_hex = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
+                        if match_hex and int(match_hex.group(), 16) == vaddr:
+                            found_xref_vaddr = insn.address
+                            break
+            except:
+                pass
+
+            if found_xref_vaddr:                
+                code_offset = found_xref_vaddr - self.base_address
+                if code_offset + 64 <= self.file_size:
+                    code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
+                    pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
+                    if "{" in pseudo_c and "+=" not in pseudo_c:
+                        lines.append(f"    //  Auto-C XREF Triggered at {hex(found_xref_vaddr)}")
+                        lines.append(pseudo_c)            
 
         lines.append("")
         self.check_and_print("\n".join(lines))
