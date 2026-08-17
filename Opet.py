@@ -110,7 +110,7 @@ class Runnow:
         
         if outfile:
             if os.path.exists(outfile):
-                print(f"\033[93m[WARNING] File '{outfile}' already exists.\033[0m")
+                print(f"[WARNING] File '{outfile}' already exists.")
                 confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Force Print): ").strip().lower()
                 
                 if confirm == 'p':
