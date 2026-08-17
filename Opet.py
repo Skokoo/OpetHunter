@@ -23,6 +23,15 @@ except ImportError:
     print(f"[ERROR] The file 'CDec.py' NOT found IN dir: {dec_folder_path}")
     sys.exit(1)
 
+info_folder_path = os.path.join(current_dir, "INFO")
+if info_folder_path not in sys.path:
+    sys.path.insert(0, info_folder_path)
+try:
+    from Info import InfoValidator
+except ImportError:
+    print(f"[ERROR] The file 'Info.py' NOT found IN dir: {info_folder_path}")
+    sys.exit(1)
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
@@ -275,6 +284,7 @@ class Runnow:
                                  f"  asmd [size]: Decompile assembly block at cursor to Pseudo-C (Default: 64 bytes)\n"
                                  f"  s <offset> : Seek cursor to target virtual address\n"
                                  f"  !<command> : Execute system shell command (e.g. !ls, !clear)\n"
+                                 f"  info       : Execute file signature evaluation & false positive filter\n"
                                  f"  h, help    : Show this commands list\n"
                                  f"  q, exit    : Close the program\n")
                     self.check_and_print(help_text)                
@@ -299,6 +309,10 @@ class Runnow:
                         print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
                 elif cmd == "iz": self.print_strings(args)
+                elif cmd == "info":                     
+                    engine = InfoValidator(self.binary_data)
+                    rep = engine.run_pipeline()
+                    self.check_and_print(rep)
                 elif cmd == "s" and args:
                     try:
                         target = args[0]
