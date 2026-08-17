@@ -277,9 +277,9 @@ class Runnow:
 
         for match in matches:
             raw_str = match.group().decode('ascii', errors='ignore')
-        if raw_str.startswith(".") or any(raw_str.startswith(sec) for sec in elf_sections):
+            if raw_str.startswith(".") or any(raw_str.startswith(sec) for sec in elf_sections):
                 continue
-                       
+                      
             if len(set(raw_str)) <= 1: 
                 continue                            
             
