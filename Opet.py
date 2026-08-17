@@ -325,7 +325,7 @@ class Runnow:
         lines.append("")
         self.check_and_print("\n".join(lines))
 
-        if mode_ask == 'y':
+        if aask == 'y':
             print(f"\n{BOLD}[TIPS]{RESET}")
             print("[i] Don't forget to check the output, don't get fooled by null bytes.")
             print("[i] Since you bypassed the sensor, most of the data above is padding noise (+= ch/al).")
