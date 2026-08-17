@@ -301,20 +301,23 @@ class Runnow:
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
                 elif cmd == "ax": self.find_xrefs()
-                elif cmd == "asmd":                    
+                elif cmd == "asmd":
                     chunk_size = 64
                     if args:
-                        try: chunk_size = int(args[0])
-                        except: 
+                        try:
+                            chunk_size = int(args)
+                        except:
                             pass
-                        
                     if self.cursor + chunk_size <= self.file_size:
                         code_chunk = self.binary_data[self.cursor : self.cursor + chunk_size]
-                        vaddr_start = self.base_address + self.cursor                        
-                        
+                        vaddr_start = self.base_address + self.cursor
                         decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
                         pseudo_c = decompiler.run_decompile()
-                        self.check_and_print(pseudo_c)
+                                                
+                        if pseudo_c is not None:
+                            self.check_and_print(pseudo_c)
+                        else:
+                            print("[ERROR] Decompiler returned empty data.")
                     else:
                         print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
