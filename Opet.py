@@ -264,12 +264,18 @@ class Runnow:
         return "\n".join(c_lines)
 
     def print_strings(self, args):        
-        filter_keyword = None       
-        if args and isinstance(args, list) and len(args) > 0:
-            if not str(args[0]).startswith("-"):
-                filter_keyword = str(args[0]).lower() 
-        elif args and isinstance(args, str) and not args.startswith("-"):
+        filter_keyword = None
+        if args and not str(args).startswith("-"):
             filter_keyword = args.lower()
+        
+        aask = input("Bypass Data Sanitization? (y: As-is Output / n: Filter Junk code): ").strip().lower()       
+        
+        if aask == 'y':
+            bad_signals = ()
+            print("[INFO] Sensor Disabled. Output raw emulation bytes.")
+        else:
+            bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
+            print("[INFO] Sensor Enabled. Fidelity code filter active.")
 
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
 
@@ -308,9 +314,9 @@ class Runnow:
                 code_chunk = self.binary_data[local_offset : local_offset + 64]
                 raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
                 
-                bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
-                if raw_c and "{" in raw_c and not any(sig in raw_c.lower() for sig in bad_signals):
-                    pseudo_c = raw_c
+                if raw_c and "{" in raw_c:
+                    if not bad_signals or not any(sig in raw_c.lower() for sig in bad_signals):
+                        pseudo_c = raw_c
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
             if pseudo_c and "{" in pseudo_c and len(pseudo_c.strip().split("\n")) > 2:
