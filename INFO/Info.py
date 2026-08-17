@@ -43,3 +43,10 @@ class InfoValidator:
             buffed.append(line)
 
         return "\n".join(buffed)
+
+    def run_pipeline(self):       
+        gatherer = BinaryGatherer(self.raw)
+        raw_rep = gatherer.run_gather()
+        final_rep = self.eval_report(raw_rep)
+        return final_rep
+
