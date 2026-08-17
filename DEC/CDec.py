@@ -110,6 +110,55 @@ class CapstoneDecompiler:
                 output_lines.append(f"{indent}{ops[0]} = {val};")
             elif insn.mnemonic == "mov" and len(ops) == 2:
                 output_lines.append(f"{indent}{ops[0]} = {ops[1]};")
+            elif insn.mnemonic == "xor" and len(ops) == 2:
+                if ops[0] == ops[1]: output_lines.append(f"{indent}{ops[0]} = 0;")
+                else: output_lines.append(f"{indent}{ops[0]} ^= {ops[1]};")
+            elif insn.mnemonic in ["add", "sub", "imul", "and", "or", "shl", "shr"] and len(ops) == 2:
+                sign_map = {"add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>="}
+                output_lines.append(f"{indent}{ops[0]} {sign_map[insn.mnemonic]} {ops[1]};")
+            elif insn.mnemonic == "call":
+                output_lines.append(f"{indent}sub_{clean_op}();")
+
+            elif insn.mnemonic.startswith("j") and insn.mnemonic != "jmp":
+                condition = "status_flag"                
+                if i > 0 and instructions[i-1].mnemonic == "cmp":
+                    prev_clean = self.clean_operand(instructions[i-1].op_str)
+                    prev_ops = [o.strip() for o in prev_clean.split(",")]
+                    if len(prev_ops) == 2:                        
+                        signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
+                        op_sign = signs.get(insn.mnemonic, "==")
+                        condition = f"{prev_ops[0]} {op_sign} {prev_ops[1]}"
+                
+                try:
+                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
+                    if target_addr < insn.address:
+                        indent = indent[:-4] if len(indent) > 8 else "        "
+                        output_lines.append(f"{indent}}} // End of While-Loop")
+                        continue
+                except:
+                    pass
+                output_lines.append(f"{indent}if ({condition}) {{ goto block_{clean_op}; }}")
+
+            elif insn.mnemonic == "jmp":
+                try:
+                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
+                    if target_addr < insn.address:
+                        indent = indent[:-4] if len(indent) > 8 else "        "
+                        output_lines.append(f"{indent}}} // End of While Loop")
+                        continue
+                except:
+                    pass
+                output_lines.append(f"{indent}goto block_{clean_op};")
+            elif insn.mnemonic in ["ret", "hlt"]:
+                output_lines.append(f"{indent}return;")
+                output_lines.append("    }")
+                in_function = False
+
+        if in_function:
+            output_lines.append(f"{indent}return;")
+            output_lines.append("    }")                   
+
+        return "\n".join(output_lines) if output_lines else "    // disassembly block."
 
     def check_and_print(self, out_str):       
         if out_str is None or not isinstance(out_str, str):
