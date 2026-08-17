@@ -86,7 +86,6 @@ class Runnow:
             p = count / len(data)
             entropy -= p * math.log2(p)
         return entropy
-
     def check_and_print(self, out_str):
         if out_str is None or not isinstance(out_str, str):
             print("[INFO] Decompiler returned no text or empty block.")
@@ -96,10 +95,9 @@ class Runnow:
         outfile = None
         cut_val = None
         
-        cmd_args = sys.argv[1:]
-        if cmd_args:
-            arg_str = " ".join(cmd_args)           
-            
+        if hasattr(self, 'last_args') and self.last_args:
+            arg_str = " ".join(self.last_args)
+                       
             cut_match = re.search(r'-cut\s+(\d+)', arg_str)
             if cut_match:
                 cut_val = int(cut_match.group(1))
@@ -112,34 +110,35 @@ class Runnow:
         
         if outfile:
             if os.path.exists(outfile):
-                print(f"[WARNING] File '{outfile}' already exists.")
-                confirm = input("Do you want to overwrite it? (y: Overwrite / n: Cancel / p: Force print): ").strip().lower()
-
+                print(f"\033[93m[WARNING] File '{outfile}' already exists.\033[0m")
+                confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Force Print): ").strip().lower()
+                
                 if confirm == 'p':
-                    print("[INFO] Redirecting data to screen layout.\n")
-                    outfile = None           
+                    print("[INFO] Redirecting output to screen layout.\n")
+                    outfile = None
                 elif confirm != 'y':
-                    print("[INFO] Export canceled.\n")
+                    print("[INFO] Export canceled.")
                     return
             
             if outfile:
-                try:                    
+                try:
                     clean_text = re.sub(r'\033\[[0-9;]*m', '', out_str)
                     with open(outfile, "w", encoding="utf-8") as f:
                         f.write(clean_text)
-                    print(f"[INFO] Exported {len(lines)} lines to: {outfile}")
+                    print(f"\033[92m[INFO] Exported {len(lines)} lines to: {outfile}\033[0m")
                     return
                 except Exception as e:
-                    print(f"[ERROR] Failed to write file: {e}")
+                    print(f"[WARNING] Failed to write file: {e}")
         
         char_count = len(out_str)
         if char_count > 1500:
-            ask = input(f"Do you want to print {char_count} characters? (y/n): ").strip().lower()
-            if ask != 'y':
-                print("[INFO] Printing canceled.")
-                return
-        print(out_str)
-
+            ask = input(f"Banjir {char_count} chars! (y/n)").strip().lower()
+            whitelist_print = tuple(("y"))
+            if ask not in whitelist_print:
+                print("[WARNING] Printing canceled.")
+                return              
+        print(out_str)    
+                   
     def print_disasm(self, args):
         count = 15
         if args:
@@ -149,7 +148,7 @@ class Runnow:
         chunk = self.binary_data[self.cursor : self.cursor + (count * 15)]
         vaddr_start = self.base_address + self.cursor
 
-        lines = [f"\n[INFO*] Disassembly at {hex(vaddr_start)}", f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}", "-" * 85]
+        lines = [f"\n[INFO] Disassembly at {hex(vaddr_start)}", f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}", "-" * 85]
         for insn in self.cs.disasm(chunk, vaddr_start):
             hex_bytes = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
 
