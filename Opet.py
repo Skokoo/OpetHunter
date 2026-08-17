@@ -111,10 +111,10 @@ class Runnow:
         if outfile:
             if os.path.exists(outfile):
                 print(f"[WARNING] File '{outfile}' already exists.")
-                confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Force Print): ").strip().lower()
+                confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Print): ").strip().lower()
                 
                 if confirm == 'p':
-                    print("[INFO] Redirecting output to screen layout.\n")
+                    print("\n[INFO] Redirecting output to screen layout.\n")
                     outfile = None
                 elif confirm != 'y':
                     print("[INFO] Export canceled.")
@@ -125,14 +125,15 @@ class Runnow:
                     clean_text = re.sub(r'\033\[[0-9;]*m', '', out_str)
                     with open(outfile, "w", encoding="utf-8") as f:
                         f.write(clean_text)
-                    print(f"\033[92m[INFO] Exported {len(lines)} lines to: {outfile}\033[0m")
+                    print(f"[INFO] Exported {len(lines)} lines to: {outfile}")
                     return
                 except Exception as e:
                     print(f"[WARNING] Failed to write file: {e}")
         
         char_count = len(out_str)
+        lines_count = len(lines)
         if char_count > 1500:
-            ask = input(f"Do you want to print {char_count} chars? (y/n)").strip().lower()
+            ask = input(f"Do you want to print {char_count} chars ({lines_count} lines)? (y/n)").strip().lower()
             whitelist_print = tuple(("y"))
             if ask not in whitelist_print:
                 print("[WARNING] Printing canceled.")
