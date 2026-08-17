@@ -250,7 +250,7 @@ class Runnow:
     def print_strings(self, args):
         filter_keyword = None
         if args and not args[0].startswith("-"):           
-        filter_keyword = args[0].lower() 
+            filter_keyword = args[0].lower() 
 
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code."]
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
