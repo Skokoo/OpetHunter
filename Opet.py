@@ -299,14 +299,15 @@ class Runnow:
                 color = CYAN
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
-            
+
             found_xref_vaddr = None
-            target_hex1 = hex(vaddr)
-            target_hex2 = hex(vaddr)[2:] # Format tanpa 0x untuk jaga-jaga
-            
+            target_hex1 = hex(vaddr).lower()
+            target_hex2 = hex(vaddr)[2:].lower()
+
             try:              
                 for insn in self.cs.disasm(bytes(self.binary_data), self.base_address):
-                    if target_hex1 in insn.op_str or target_hex2 in insn.op_str:
+                    op_str_lower = insn.op_str.lower()
+                    if target_hex1 in op_str_lower or target_hex2 in op_str_lower:
                         found_xref_vaddr = insn.address
                         break
             except:
@@ -317,7 +318,7 @@ class Runnow:
                 if code_offset + 64 <= self.file_size:
                     code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
                     pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
-                    if "{" in pseudo_c:
+                    if pseudo_c and "{" in pseudo_c:
                         lines.append(f"    //  Auto-C XREF at {hex(found_xref_vaddr)}")
                         lines.append(pseudo_c)            
 
