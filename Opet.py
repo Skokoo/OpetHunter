@@ -271,9 +271,14 @@ class Runnow:
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
         
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
+       elf_sections = (".fini_array", ".init_array", ".text", ".data", ".rodata", 
+                        ".comment", ".note", ".got", ".rela", ".dynstr", ".dynsym", 
+                        ".eh_frame", ".gnu", ".symtab", ".strtab", ".shstrtab")
 
         for match in matches:
             raw_str = match.group().decode('ascii', errors='ignore')
+        if raw_str.startswith(".") or any(raw_str.startswith(sec) for sec in elf_sections):
+                continue
                        
             if len(set(raw_str)) <= 1: 
                 continue                            
