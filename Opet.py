@@ -132,7 +132,7 @@ class Runnow:
         
         char_count = len(out_str)
         if char_count > 1500:
-            ask = input(f"Banjir {char_count} chars! (y/n)").strip().lower()
+            ask = input(f"Do you want to print {char_count} chars? (y/n)").strip().lower()
             whitelist_print = tuple(("y"))
             if ask not in whitelist_print:
                 print("[WARNING] Printing canceled.")
