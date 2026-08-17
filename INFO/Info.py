@@ -38,7 +38,7 @@ class InfoValidator:
                 line = "* Linker : None"                
             
             if "UPX" in line and not is_text:
-                line = line.replace("UPX", "\033[1m[WARNING**] UPX\033[0m")
+                line = line.replace("UPX", "\033[1m* UPX\033[0m")
 
             buffed.append(line)
 
