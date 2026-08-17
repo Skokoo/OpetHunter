@@ -265,8 +265,8 @@ class Runnow:
 
     def print_strings(self, args):        
         filter_keyword = None
-        if args and not str(args[0]).startswith("-"):
-            filter_keyword = args[0].lower()
+        if args and not str(args).startswith("-"):
+            filter_keyword = args.lower()
 
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
 
@@ -297,30 +297,19 @@ class Runnow:
                 color = RED
             elif any(x in raw_str.lower() for x in tuple(("debug", "assert", "gcc", "main"))): 
                 color = CYAN
-
-            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
             
-            found_xref_vaddr = None
-            for insn in self.cs.disasm(self.binary_data, self.base_address):
-                if hex(vaddr) in insn.op_str:                   
-                    found_xref_vaddr = insn.address
-                    break
-                if insn.mnemonic in ["adr", "adrp"] and insn.op_str:
-                    try:
-                        match_hex = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
-                        if match_hex and int(match_hex.group(), 16) == vaddr:
-                            found_xref_vaddr = insn.address
-                            break
-                    except:
-                        pass
-
-            if found_xref_vaddr:                
-                code_offset = found_xref_vaddr - self.base_address
-                if code_offset + 64 <= self.file_size:
-                    code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
-                    pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
-                    lines.append(f"    // XREF Code Pointer Found at {hex(found_xref_vaddr)}")
-                    lines.append(pseudo_c)            
+            local_offset = offset + len(match.group())
+            pseudo_c = ""
+            
+            if local_offset + 64 <= self.file_size:
+                code_chunk = self.binary_data[local_offset : local_offset + 64]
+                raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
+                             
+                if raw_c.count("+=") < 3 and raw_c.count("byte ptr") < 3 and raw_c.count("ch") < 3:
+                    pseudo_c = raw_c           
+            lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
+            if pseudo_c and "{" in pseudo_c:
+                lines.append(pseudo_c)
 
         lines.append("")
         self.check_and_print("\n".join(lines))
