@@ -88,6 +88,50 @@ class Runnow:
         return entropy
 
     def check_and_print(self, out_str):
+        if out_str is None or not isinstance(out_str, str):
+            print("[INFO] Decompiler returned no text or empty block.")
+            return
+
+        lines = out_str.split("\n")
+        outfile = None
+        cut_val = None
+        
+        cmd_args = sys.argv[1:]
+        if cmd_args:
+            arg_str = " ".join(cmd_args)           
+            
+            cut_match = re.search(r'-cut\s+(\d+)', arg_str)
+            if cut_match:
+                cut_val = int(cut_match.group(1))
+                lines = lines[:cut_val]
+                out_str = "\n".join(lines)
+            
+            out_match = re.search(r'-o\s+(\S+)', arg_str)
+            if out_match:
+                outfile = out_match.group(1)
+        
+        if outfile:
+            if os.path.exists(outfile):
+                print(f"[WARNING] File '{outfile}' already exists.")
+                confirm = input("Do you want to overwrite it? (y: Overwrite / n: Cancel / p: Force print): ").strip().lower()
+
+                if confirm == 'p':
+                    print("[INFO] Redirecting data to screen layout.\n")
+                    outfile = None           
+                elif confirm != 'y':
+                    print("[INFO] Export canceled.\n")
+                    return
+            
+            if outfile:
+                try:                    
+                    clean_text = re.sub(r'\033\[[0-9;]*m', '', out_str)
+                    with open(outfile, "w", encoding="utf-8") as f:
+                        f.write(clean_text)
+                    print(f"[INFO] Exported {len(lines)} lines to: {outfile}")
+                    return
+                except Exception as e:
+                    print(f"[ERROR] Failed to write file: {e}")
+        
         char_count = len(out_str)
         if char_count > 1500:
             ask = input(f"Do you want to print {char_count} characters? (y/n): ").strip().lower()
@@ -95,6 +139,7 @@ class Runnow:
                 print("[INFO] Printing canceled.")
                 return
         print(out_str)
+
     def print_disasm(self, args):
         count = 15
         if args:
