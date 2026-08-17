@@ -336,17 +336,17 @@ class Runnow:
                     break
                 elif cmd in ["h", "help", "?"]:
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
-                                 f"  pd [lines]  : Disassembly view (Default: 15 lines)\n"
-                                 f"  px [bytes]  : Hex-Dump view (Default: 128 bytes)\n"
-                                 f"  ax          : Scan external XREFs call references\n"
-                                 f"  ae          : Check file encryption using Shannon Entropy\n"
-                                 f"  iz [filter] : Extract static ASCII strings from binary + Enterprise Auto-C\n"
-                                 f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C (Default: 64 bytes)\n"
+                                 f"  pd [lines]  : Disassembly view (Default: 15 lines) [Supports -o, -cut]\n"
+                                 f"  px [bytes]  : Hex-Dump view (Default: 128 bytes) [Supports -o, -cut]\n"
+                                 f"  ax          : Scan external XREFs call references [Supports -o, -cut]\n"
+                                 f"  ae          : Check file encryption using Shannon Entropy [Supports -o, -cut]\n"
+                                 f"  iz [filter] : Extract static ASCII strings from binary + Enterprise Auto-C [Supports -o, -cut]\n"
+                                 f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C [Supports -o, -cut]\n"
                                  f"  s <offset>  : Seek cursor to target virtual address\n"
-                                 f"  info        : Execute file signature evaluation & false positive filter\n"
+                                 f"  info        : Execute file signature evaluation & false positive filter [Supports -o, -cut]\n"
                                  f"  !<command>  : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help     : Show this commands list\n"
-                                 f"  q, exit     : Close the program\n")                                                      
+                                 f"  q, exit     : Close the program\n")                                                       
                     self.check_and_print(help_text)                
                 elif cmd == "pd": self.print_disasm(args)
                 elif cmd == "px": self.print_hex_dump(args)
