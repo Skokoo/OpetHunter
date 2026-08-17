@@ -264,8 +264,11 @@ class Runnow:
         return "\n".join(c_lines)
 
     def print_strings(self, args):        
-        filter_keyword = None
-        if args and not str(args).startswith("-"):
+        filter_keyword = None       
+        if args and isinstance(args, list) and len(args) > 0:
+            if not str(args[0]).startswith("-"):
+                filter_keyword = str(args[0]).lower() 
+        elif args and isinstance(args, str) and not args.startswith("-"):
             filter_keyword = args.lower()
 
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
