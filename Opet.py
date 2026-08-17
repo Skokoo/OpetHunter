@@ -299,7 +299,20 @@ class Runnow:
                 color = CYAN
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
-            
+found_xref_vaddr = None
+                     
+            for insn in self.cs.disasm(self.binary_data, self.base_address):
+                if hex(vaddr) in insn.op_str:                   
+                    found_xref_vaddr = insn.address
+                    break
+
+            if found_xref_vaddr:                
+                code_offset = found_xref_vaddr - self.base_address
+                if code_offset + 64 <= self.file_size:
+                    code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
+                    pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
+                    lines.append(f"    // XREF Code Pointer Found at {hex(found_xref_vaddr)}")
+                    lines.append(pseudo_c)            
             local_offset = offset + len(match.group())
             if local_offset + 64 <= self.file_size:
                 code_chunk = self.binary_data[local_offset : local_offset + 64]
