@@ -325,6 +325,25 @@ class Runnow:
         lines.append("")
         self.check_and_print("\n".join(lines))
 
+        if mode_ask == 'y':
+            print(f"\n{BOLD}[TIPS]{RESET}")
+            print("[i] Don't forget to check the output, don't get fooled by null bytes.")
+            print("[i] Since you bypassed the sensor, most of the data above is padding noise (+= ch/al).")
+            print("[i] But, just keep scrolling and don't be lazy to scan... you might encounteted a gold.\n")
+            print(f"{BOLD}[Example of Null Bytes]{RESET}")
+            print(f"    // Loop recovery or code block containing constant junk:")
+            print(f"    {{")
+            print(f"        byte ptr [arg2] += ch;  <-- Monoton repetition")
+            print(f"        byte ptr [arg4] += al;  <-- 00 00 padding byte")
+            print(f"    }}\n")
+            
+            print(f"{BOLD}[Example of active code]{RESET}")
+            print(f"    // Real program logic or encryption functions found:")
+            print(f"    {{")
+            print(f"        eax ^= 0x34327800;      <-- Real cryptographic XOR key")
+            print(f"        if (!(param_1 == eax))  <-- Control flow conditional check")
+            print(f"    }}\n")
+
     def find_xrefs(self):
         target_vaddr = self.base_address + self.cursor
         lines = [f"\n[INFO] Scanning XREFs for address: {hex(target_vaddr)}..."]
