@@ -110,3 +110,16 @@ class CapstoneDecompiler:
                 output_lines.append(f"{indent}{ops[0]} = {val};")
             elif insn.mnemonic == "mov" and len(ops) == 2:
                 output_lines.append(f"{indent}{ops[0]} = {ops[1]};")
+
+    def check_and_print(self, out_str):       
+        if out_str is None or not isinstance(out_str, str):
+            print("[WARNING] Decompiler returned no text.")
+            return
+
+        char_count = len(out_str)
+        if char_count > 1500:
+            ask = input(f"Do you want to print {char_count} characters? (y/n): ").strip().lower()
+            if ask != 'y':
+                print("[INFO] Printing canceled.")
+                return
+        print(out_str)
