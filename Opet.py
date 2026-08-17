@@ -258,24 +258,35 @@ class Runnow:
         c_lines.append("    }")
         return "\n".join(c_lines)
 
-    def print_strings(self, args):
+    def print_strings(self, args):        
         filter_keyword = None
-        if args and not args[0].startswith("-"):           
-            filter_keyword = args[0].lower() 
+        if args and not str(args[0]).startswith("-"):
+            filter_keyword = args[0].lower()
 
-        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code."]
+        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
+        
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
 
         for match in matches:
             raw_str = match.group().decode('ascii', errors='ignore')
-            if filter_keyword and filter_keyword not in raw_str.lower(): continue
+                       
+            if len(set(raw_str)) <= 1: 
+                continue                            
+            
+            alphabetic_count = sum(1 for char in raw_str if char.isalpha())
+            if len(raw_str) > 0 and (alphabetic_count / len(raw_str)) < 0.40:               
+                continue
+            
+            if filter_keyword and filter_keyword not in raw_str.lower(): 
+                continue
 
             offset = match.start()
-            vaddr = self.base_address + offset
-
+            vaddr = self.base_address + offset            
             color = GREEN
-            if any(x in raw_str.lower() for x in ["http", ".exe", "select", "cmd", "password", "flag{"]): color = RED
-            elif any(x in raw_str.lower() for x in ["debug", "assert", "gcc", "main"]): color = CYAN
+            if any(x in raw_str.lower() for x in tuple(("http", ".exe", "select", "cmd", "password", "flag{"))): 
+                color = RED
+            elif any(x in raw_str.lower() for x in tuple(("debug", "assert", "gcc", "main"))): 
+                color = CYAN
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
             
