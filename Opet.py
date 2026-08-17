@@ -300,27 +300,19 @@ class Runnow:
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
 
-            found_xref_vaddr = None
-            target_hex1 = hex(vaddr).lower()
-            target_hex2 = hex(vaddr)[2:].lower()
+            local_offset = offset + len(match.group())
+            pseudo_c = ""
+            
+            if local_offset + 64 <= self.file_size:
+                code_chunk = self.binary_data[local_offset : local_offset + 64]
+                raw_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
+                               
+                bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah")
+                if raw_c and "{" in raw_c and not any(sig in raw_c for sig in bad_signals):
+                    pseudo_c = raw_c
 
-            try:              
-                for insn in self.cs.disasm(bytes(self.binary_data), self.base_address):
-                    op_str_lower = insn.op_str.lower()
-                    if target_hex1 in op_str_lower or target_hex2 in op_str_lower:
-                        found_xref_vaddr = insn.address
-                        break
-            except:
-                pass
-
-            if found_xref_vaddr:                
-                code_offset = found_xref_vaddr - self.base_address
-                if code_offset + 64 <= self.file_size:
-                    code_chunk = self.binary_data[code_offset : code_offset + 64]                                      
-                    pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
-                    if pseudo_c and "{" in pseudo_c:
-                        lines.append(f"    //  Auto-C XREF at {hex(found_xref_vaddr)}")
-                        lines.append(pseudo_c)            
+            if pseudo_c and len(pseudo_c.strip()) > 15:
+                lines.append(pseudo_c)
 
         lines.append("")
         self.check_and_print("\n".join(lines))
