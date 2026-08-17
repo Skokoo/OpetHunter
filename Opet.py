@@ -1,13 +1,3 @@
-import sys
-import os
-import re
-import math
-try:
-    from capstone import *
-except Exception:
-    print("[ERROR] The Package capstone not installed on your terminal, please install it by using pip install capstone.")
-    sys.exit(1) 
-
 #   Copyright 2026 Skokoo
 
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +11,16 @@ except Exception:
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
+import sys
+import os
+import re
+import math
+try:
+    from capstone import *
+except Exception:
+    print("[ERROR] The Package capstone not installed on your terminal, please install it by using pip install capstone.")
+    sys.exit(1) 
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 dec_folder_path = os.path.join(current_dir, "DEC")
