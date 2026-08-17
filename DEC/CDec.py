@@ -86,7 +86,7 @@ class CapstoneDecompiler:
 
         for i, insn in enumerate(instructions):                       
             if insn.address in loop_starts:                
-output_lines.append(f"{indent}while (status_flag) {{ // Loop Recovery Triggered")
+                output_lines.append(f"{indent}while (status_flag) {{ // Loop Recovery Triggered")
                 indent += "    "
 
             if insn.mnemonic == "push" and "rbp" in insn.op_str:
