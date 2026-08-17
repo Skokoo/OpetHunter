@@ -285,7 +285,7 @@ class Runnow:
                 if cmd in ["q", "exit"]: 
                     break
                 elif cmd in ["h", "help", "?"]:
-                help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
+                    help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"  pd [lines]  : Disassembly view (Default: 15 lines)\n"
                                  f"  px [bytes]  : Hex-Dump view (Default: 128 bytes)\n"
                                  f"  ax          : Scan external XREFs call references\n"
