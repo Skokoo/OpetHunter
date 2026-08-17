@@ -269,7 +269,7 @@ class Runnow:
             filter_keyword = args[0].lower()
 
         lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
-        
+
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
         elf_sections = (".fini_array", ".init_array", ".text", ".data", ".rodata", 
                         ".comment", ".note", ".got", ".rela", ".dynstr", ".dynsym", 
@@ -279,14 +279,14 @@ class Runnow:
             raw_str = match.group().decode('ascii', errors='ignore')
             if raw_str.startswith(".") or any(raw_str.startswith(sec) for sec in elf_sections):
                 continue
-                      
+
             if len(set(raw_str)) <= 1: 
                 continue                            
-            
+
             alphabetic_count = sum(1 for char in raw_str if char.isalpha())
             if len(raw_str) > 0 and (alphabetic_count / len(raw_str)) < 0.40:               
                 continue
-            
+
             if filter_keyword and filter_keyword not in raw_str.lower(): 
                 continue
 
@@ -299,12 +299,20 @@ class Runnow:
                 color = CYAN
 
             lines.append(f"  {hex(offset)}\t{hex(vaddr)}\t-> {color}{raw_str}{RESET}")
-found_xref_vaddr = None
-                     
+            
+            found_xref_vaddr = None
             for insn in self.cs.disasm(self.binary_data, self.base_address):
                 if hex(vaddr) in insn.op_str:                   
                     found_xref_vaddr = insn.address
                     break
+                if insn.mnemonic in ["adr", "adrp"] and insn.op_str:
+                    try:
+                        match_hex = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
+                        if match_hex and int(match_hex.group(), 16) == vaddr:
+                            found_xref_vaddr = insn.address
+                            break
+                    except:
+                        pass
 
             if found_xref_vaddr:                
                 code_offset = found_xref_vaddr - self.base_address
@@ -313,11 +321,6 @@ found_xref_vaddr = None
                     pseudo_c = self.translate_bytes_to_c(code_chunk, found_xref_vaddr)
                     lines.append(f"    // XREF Code Pointer Found at {hex(found_xref_vaddr)}")
                     lines.append(pseudo_c)            
-            local_offset = offset + len(match.group())
-            if local_offset + 64 <= self.file_size:
-                code_chunk = self.binary_data[local_offset : local_offset + 64]
-                pseudo_c = self.translate_bytes_to_c(code_chunk, vaddr + len(match.group()))
-                lines.append(pseudo_c)
 
         lines.append("")
         self.check_and_print("\n".join(lines))
