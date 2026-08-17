@@ -268,7 +268,7 @@ class Runnow:
         if args and not str(args).startswith("-"):
             filter_keyword = args.lower()
         
-        aask = input("Bypass Data Sanitization? (y: As-is Output / n: Filter Junk code): ").strip().lower()       
+        aask = input("Bypass Data Sanitization? (y: As-is Output (RECOMMENDED) / n: Filter Junk code): ").strip().lower()       
         
         if aask == 'y':
             bad_signals = ()
