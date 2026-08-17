@@ -13,6 +13,8 @@
 #   limitations under the License.
 
 import re
+import os
+import json
 from capstone import *
 
 class CapstoneDecompiler:
@@ -21,15 +23,16 @@ class CapstoneDecompiler:
         self.base_address = base_address
         self.cs = Cs(CS_ARCH_X86, CS_MODE_64)
         self.cs.detail = True       
-
-        self.reg_cleaner = {
-            "rax": "local_res", "eax": "local_res_32",
-            "rdi": "param_1", "edi": "param_1_32",
-            "rsi": "param_2", "esi": "param_2_32",
-            "rdx": "param_3", "edx": "param_3_32",
-            "rcx": "param_4", "ecx": "param_4_32",
-            "r8": "param_5", "r9": "param_6"
-        }
+        
+        self.reg_cleaner = {}
+        try:
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            json_path = os.path.join(current_dir, "reg_map.json")
+            with open(json_path, "r") as f:
+                config = json.load(f)
+            self.reg_cleaner = {k: v["clean_name"] for k, v in config["registers"].items()}
+        except:           
+            pass
 
     def clean_operand(self, op_str):        
         clean = op_str.replace("qword ptr", "").replace("dword ptr", "")
@@ -72,13 +75,13 @@ class CapstoneDecompiler:
             return "    // disassembly critical failure."
 
         if not instructions:
-            return "    // No valid execution  to decompile."
-        
+            return "    // No valid execution to decompile."
+
         loop_starts = set()
         for insn in instructions:
             if insn.mnemonic == "jmp" or insn.mnemonic.startswith("j"):
                 try:
-                    target_addr = int(insn.op_str, 16)                    
+                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)                   
                     if target_addr < insn.address:
                         loop_starts.add(target_addr)
                 except:
@@ -102,7 +105,6 @@ class CapstoneDecompiler:
 
             clean_op = self.clean_operand(insn.op_str)
             ops = [o.strip() for o in clean_op.split(",")] if "," in clean_op else [clean_op]
-            
             resolved_str = self.resolve_inline_string(insn)
 
             if insn.mnemonic == "lea" and len(ops) == 2:
@@ -128,12 +130,12 @@ class CapstoneDecompiler:
                         signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
                         op_sign = signs.get(insn.mnemonic, "==")
                         condition = f"{prev_ops[0]} {op_sign} {prev_ops[1]}"
-                
+
                 try:
                     target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
                     if target_addr < insn.address:
                         indent = indent[:-4] if len(indent) > 8 else "        "
-                        output_lines.append(f"{indent}}} // End of While-Loop")
+                        output_lines.append(f"{indent}}} // End of While Loop")
                         continue
                 except:
                     pass
@@ -159,16 +161,3 @@ class CapstoneDecompiler:
             output_lines.append("    }")                   
 
         return "\n".join(output_lines) if output_lines else "    // disassembly block."
-
-    def check_and_print(self, out_str):       
-        if out_str is None or not isinstance(out_str, str):
-            print("[WARNING] Decompiler returned no text.")
-            return
-
-        char_count = len(out_str)
-        if char_count > 1500:
-            ask = input(f"Do you want to print {char_count} characters? (y/n): ").strip().lower()
-            if ask != 'y':
-                print("[INFO] Printing canceled.")
-                return
-        print(out_str)
