@@ -69,10 +69,6 @@ class Analyze:
         lines.append("")
         return "\n".join(lines)
 
-class Analyze:
-    def __init__(self, instance):
-        self.shell = instance
-
     def EntropyMap(self):
         size = self.shell.file_size
         block = 512
