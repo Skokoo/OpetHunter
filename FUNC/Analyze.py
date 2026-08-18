@@ -32,7 +32,7 @@ class Analyze:
         lines.append("")
         return "\n".join(lines)
 
-    def analyze_entropy_map(self):
+    def EntropyMap(self):
         lines = [f"\n[\033[1mINFO\033[0m] Shannon Entropy Analysis", "Block\tVirtual Addr\tScore\t\tStatus / Graph", "-" * 75]
         block_size = 512
 
