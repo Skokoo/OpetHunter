@@ -16,7 +16,7 @@ class Analyze:
     def __init__(self, shell_instance):
         self.shell = shell_instance
 
-    def run(self, args):
+    def runXREF(self, args):
         target_vaddr = self.shell.base_address + self.shell.cursor
         lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target_vaddr)}..."]
         found_xrefs = 0
