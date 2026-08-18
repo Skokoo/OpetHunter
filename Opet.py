@@ -83,7 +83,15 @@ class Runnow:
         self.cursor = 0x0
         self.base_address = 0x10000000
         self.last_args = None
-        self.modules = modules
+        self.modules = modules        
+        self.GREEN = GREEN
+        self.RED = RED
+        self.CYAN = CYAN
+        self.RESET = RESET
+        self.BOLD = BOLD
+        self.WHITE = WHITE
+        self.YELLOW = YELLOW
+        self.BLUE = BLUE
 
         try:
             with open(filepath, "rb") as f:
