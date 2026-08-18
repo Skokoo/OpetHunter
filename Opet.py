@@ -66,6 +66,7 @@ else:
             modules[class_name] = cls
         except Exception as e:
             print(f"[\033[1mERROR\033[0m] Failed to import: {file_name}.{class_name}: {e}")
+            sys.exit(1)
 
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
