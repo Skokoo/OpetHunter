@@ -211,9 +211,28 @@ class Runnow:
                                  f"  h, help     : Show this commands list\n"
                                  f"  q, exit     : Close the program\n")                                                       
                     self.check_and_print(help_text)                
-                elif cmd == "pd": self.print_disasm(args)
-                elif cmd == "px": self.print_hex_dump(args)
-                elif cmd == "ax": self.find_xrefs()
+                elif cmd == "pd":
+                    if "Disasm" in self.modules:
+                        self.check_and_print(self.modules["Disasm"](self).run(args))
+
+                elif cmd == "px":
+                    if "Hexdump" in self.modules:
+                        self.check_and_print(self.modules["Hexdump"](self).run(args))
+
+                elif cmd == "iz":
+                    if "StringsExtract" in self.modules:
+                        res_text = self.modules["StringsExtract"](self).run(args)
+                        if res_text:
+                            self.check_and_print(res_text)
+
+                elif cmd == "ax":
+                    if "Analyze" in self.modules:
+                        self.check_and_print(self.modules["Analyze"](self).runXREF(args))
+
+                elif cmd == "ae":
+                    if "Analyze" in self.modules:
+                        self.check_and_print(self.modules["Analyze"](self).EntropyMap())
+
                 elif cmd == "asmd":
                     chunk_size = 64
                     if args:
@@ -226,15 +245,13 @@ class Runnow:
                         vaddr_start = self.base_address + self.cursor
                         decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
                         pseudo_c = decompiler.run_decompile()
-                                                
+
                         if pseudo_c is not None:
                             self.check_and_print(pseudo_c)
                         else:
                             print("[\033[1mERROR\033[0m] Decompiler returned empty data.")
                     else:
                         print("[\033[1mWARNING\033[0m] Cursor position near EOF. Cannot decompile out of bounds.")
-                elif cmd == "ae": self.analyze_entropy_map()
-                elif cmd == "iz": self.print_strings(args)
                 elif cmd == "info":                     
                     engine = InfoValidator(self.binary_data)
                     rep = engine.run_pipeline()
@@ -252,7 +269,7 @@ class Runnow:
                 else:
                     print("[\033[1mWARNING\033[0m] Unknown command. Type \033[1m'help'\033[0m for options.")
             except (KeyboardInterrupt, EOFError):                
-                break
+                break             
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
