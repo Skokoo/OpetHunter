@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-class HexdumpEngine:
+class Hexdump:
     def __init__(self, shell_instance):
         self.shell = shell_instance
 
