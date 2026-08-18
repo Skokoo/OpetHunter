@@ -14,17 +14,9 @@
 
 import re
 
-RESET = "\033[0m"
-BOLD = "\033[1m"
-RED = "\033[91m"
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
-MAGENTA = "\033[95m"
-WHITE = "\033[97m"
-
 class Disasm:
-    def __init__(self, shell_instance):
-        self.shell = shell_instance
+    def __init__(self, instance):
+        self.shell = instance
 
     def run(self, args):
         count = 15
@@ -32,32 +24,63 @@ class Disasm:
             try: count = int(args[0])
             except: pass
 
-        chunk = self.shell.binary_data[self.shell.cursor : self.shell.cursor + (count * 15)]
-        vaddr_start = self.shell.base_address + self.shell.cursor
+        cursor = self.shell.cursor
+        base = self.shell.base_address
+        binary = self.shell.binary_data
+                
+        architecture = "x86"
+        if len(binary) >= 20:
+            machine = binary[18]
+            if machine == 0xb7:
+                architecture = "arm"
+      
+        size = count * 4 if architecture == "arm" else count * 15
+        chunk = binary[cursor : cursor + size]
+        vaddr = base + cursor
 
-        lines = [f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr_start)}", f"{self.shell.BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{self.shell.RESET}", "-" * 85]
-        for insn in self.shell.cs.disasm(chunk, vaddr_start):
-            hex_bytes = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
+        bold = self.shell.BOLD
+        reset = self.shell.RESET
+        white = self.shell.WHITE
+        red = self.shell.RED
+        magenta = self.shell.MAGENTA
+        yellow = self.shell.YELLOW
+        green = self.shell.GREEN
 
-            op_str_colored = insn.op_str
-            op_str_colored = re.sub(r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b', f"{self.shell.BOLD}\\1{self.shell.RESET}", op_str_colored)
-            op_str_colored = re.sub(r'(0x[0-9a-fA-F]+)', f"{self.shell.BOLD}\\1{self.shell.RESET}", op_str_colored)
+        lines = [
+            f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'arm' else 'x86_64'})", 
+            f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
+            "-" * 85
+        ]
+              
+        pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|x\d+|w\d+|sp|wsp|pc|lr)\b' if architecture == "arm" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
 
-            mnemonic_colored = insn.mnemonic
-            flow_line = f"{self.shell.WHITE}│{self.shell.RESET}"
+        index = 0
+        for insn in self.shell.cs.disasm(chunk, vaddr):
+            if index >= count: 
+                break
+            
+            bytes_str = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
+            operands = insn.op_str
+            operands = re.sub(pattern, f"{bold}\\1{reset}", operands)
+            operands = re.sub(r'(0x[0-9a-fA-F]+)', f"{bold}\\1{reset}", operands)
 
-            if insn.mnemonic.startswith('j'):
-                mnemonic_colored = f"{self.shell.RED}{self.shell.BOLD}{insn.mnemonic}{self.shell.RESET}"
-                flow_line = f"{self.shell.BOLD}├── [JMP]{self.shell.RESET}"
-            elif insn.mnemonic == 'call':
-                mnemonic_colored = f"{self.shell.MAGENTA}{self.shell.BOLD}{insn.mnemonic}{self.shell.RESET}"
-                flow_line = f"{self.shell.MAGENTA}├── [CALL]{self.shell.RESET}"
-            elif insn.mnemonic in ['ret', 'hlt']:
-                mnemonic_colored = f"{self.shell.YELLOW}{self.shell.BOLD}{insn.mnemonic}{self.shell.RESET}"
-                flow_line = f"{self.shell.YELLOW}└── [END]{self.shell.RESET}"
-            elif insn.mnemonic in ['xor', 'sub', 'add', 'cmp']:
-                mnemonic_colored = f"{self.shell.GREEN}{insn.mnemonic}{self.shell.RESET}"
+            mnemonic = insn.mnemonic
+            flow = f"{white}│{reset}"
+            
+            if mnemonic.startswith('j') or (architecture == "arm" and mnemonic in ['b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
+                mnemonic = f"{red}{bold}{mnemonic}{reset}"
+                flow = f"{bold}├── [JMP]{reset}"
+            elif mnemonic == 'call' or (architecture == "arm" and mnemonic == 'bl'):
+                mnemonic = f"{magenta}{bold}{mnemonic}{reset}"
+                flow = f"{magenta}├── [CALL]{reset}"
+            elif mnemonic in ['ret', 'hlt']:
+                mnemonic = f"{yellow}{bold}{mnemonic}{reset}"
+                flow = f"{yellow}└── [END]{reset}"
+            elif mnemonic in ['xor', 'sub', 'add', 'cmp', 'eor', 'subs', 'adds']:
+                mnemonic = f"{green}{mnemonic}{reset}"
 
-            lines.append(f"  {self.shell.WHITE}{hex(insn.address)}{RESET if not hasattr(self.shell, 'RESET') else self.shell.RESET}\t{hex_bytes}\t{flow_line}\t{mnemonic_colored} {op_str_colored}")
+            lines.append(f"  {white}{hex(insn.address)}{\033[97m if not hasattr(self.shell, 'RESET') else reset}\t{bytes_str}\t{flow}\t{mnemonic} {operands}")
+            index += 1
+            
         lines.append("-" * 85 + "\n")
         return "\n".join(lines)
