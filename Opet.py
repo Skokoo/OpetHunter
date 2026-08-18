@@ -271,6 +271,10 @@ class Runnow:
                 elif cmd == "px":
                     if "Hexdump" in self.modules:
                         self.check_and_print(self.modules["Hexdump"](self).run(args))
+
+                elif cmd == "iz":
+                    if "StringsExtract" in self.modules:                      
+                        self.modules["StringsExtract"](self).run(args)
               
                 elif cmd == "ax":
                     if "Analyze" in self.modules:
