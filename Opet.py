@@ -277,7 +277,7 @@ class Runnow:
             print("[\033[1mINFO\033[0m] Sensor Disabled. Output raw emulation bytes.")
         else:
             bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
-            print("[\033[1mINFO\033[0m] Sensor Enabled. Fidelity code filter active. Please note that this potentially lead to \033[1mNo Decompiling.\033[0m")
+            print("[\033[1mINFO\033[0m] Sensor Enabled. Fidelity code filter active. \033[1mPlease note that this potentially lead to No Decompiling.\033[0m")
 
         lines = [f"\n[\033[1mINFO\033[0m] Extracting Static Strings & Decompiling Associated Code..."]      
 
@@ -384,7 +384,7 @@ class Runnow:
 
     def run_shell(self):
         filename = os.path.basename(self.filepath)
-        print(f"[INFO] Loaded: {filename} ({self.file_size} bytes)")
+        print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
 
         while True:
             try:
