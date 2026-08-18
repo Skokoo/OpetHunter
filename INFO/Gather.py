@@ -91,7 +91,7 @@ class BinaryGatherer:
 
         res = [
             "\n" + "="*60,
-            f" [INFO] METADATA",
+            f" [INFO] \033[1mMETADATA\033[0m",
             "="*60,
             f"  * Size   : {self.sz} bytes",
             f"  * Format : {fmt}",
@@ -103,7 +103,7 @@ class BinaryGatherer:
         ]
 
         if sec:
-            res.append("[WARNING] Alerts/Protections:")
+            res.append("[\033[1mWARNING\033[0m] Alerts/Protections:")
             for x in sec:
                 res.append(f"-> \033[1m{x}\033[0m")
         else:
