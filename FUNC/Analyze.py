@@ -13,10 +13,6 @@
 #   limitations under the License.
 
 class Analyze:
-    def __init__(self, shell_instance):
-        self.shell = shell_instance
-
-class Analyze:
     def __init__(self, instance):
         self.shell = instance
 
