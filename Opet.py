@@ -42,8 +42,7 @@ except ImportError:
     print(f"[ERROR] The file 'Info.py' NOT found IN dir: {info_folder_path}")
     sys.exit(1)
 
-        self.modules = {}
-        func_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FUNC")
+func_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "FUNC")
         
         if not os.path.exists(func_dir):
             print(f"[\033[1mERROR\033[0m] The directory 'FUNC' not found in path: {func_dir}")
