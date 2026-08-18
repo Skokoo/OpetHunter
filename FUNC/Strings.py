@@ -105,6 +105,6 @@ class StringsExtract:
             print(f"    {{")
             print(f"        eax ^= 0x34327800;      <-- Real cryptographic XOR key")
             print(f"        if (!(param_1 == eax))  <-- Control flow conditional check")
-            print(f"    }}\n")
-        
-        return None
+            print(f"    }}\n")      
+                
+        return "\n".join(lines)
