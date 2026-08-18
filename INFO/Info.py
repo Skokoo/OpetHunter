@@ -18,7 +18,7 @@ import sys
 try:
     from Gather import BinaryGatherer
 except ImportError:
-    print("[ERROR*] Gather.py cannot be imported inside INFO folder.")
+    print("[\033[1mERROR*\033[0m] Gather.py cannot be imported inside INFO folder.")
 
 class InfoValidator:
     def __init__(self, data_bytes):
