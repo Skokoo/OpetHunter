@@ -26,14 +26,15 @@ class Disasm:
 
         cursor = self.shell.cursor
         base = self.shell.base_address
-        binary = self.shell.binary_data
-                
+        binary = self.shell.binary_data       
+        
         architecture = "x86"
         if len(binary) >= 20:
             machine = binary[18]
-            if machine == 0xb7:
+            if machine == 0xb7
                 architecture = "arm"
-      
+
+        
         size = count * 4 if architecture == "arm" else count * 15
         chunk = binary[cursor : cursor + size]
         vaddr = base + cursor
@@ -50,8 +51,8 @@ class Disasm:
             f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'arm' else 'x86_64'})", 
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
-        ]
-              
+        ]       
+        
         pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|x\d+|w\d+|sp|wsp|pc|lr)\b' if architecture == "arm" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
 
         index = 0
@@ -78,8 +79,8 @@ class Disasm:
                 flow = f"{yellow}└── [END]{reset}"
             elif mnemonic in ['xor', 'sub', 'add', 'cmp', 'eor', 'subs', 'adds']:
                 mnemonic = f"{green}{mnemonic}{reset}"
-
-            lines.append(f"  {white}{hex(insn.address)}{\033[97m if not hasattr(self.shell, 'RESET') else reset}\t{bytes_str}\t{flow}\t{mnemonic} {operands}")
+            
+            lines.append(f"  {white}{hex(insn.address)}{reset}\t{bytes_str}\t{flow}\t{mnemonic} {operands}")
             index += 1
             
         lines.append("-" * 85 + "\n")
