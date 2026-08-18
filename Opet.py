@@ -271,13 +271,7 @@ class Runnow:
                 elif cmd == "px":
                     if "Hexdump" in self.modules:
                         self.check_and_print(self.modules["Hexdump"](self).run(args))
-
-                elif cmd == "iz":
-                    if "StringsExtract" in self.modules:
-                        res_text = self.modules["StringsExtract"](self).run(args)
-                        if res_text:
-                            self.check_and_print(res_text)
-
+              
                 elif cmd == "ax":
                     if "Analyze" in self.modules:
                         self.check_and_print(self.modules["Analyze"](self).runXREF(args))
