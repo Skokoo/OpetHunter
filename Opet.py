@@ -89,6 +89,7 @@ class Runnow:
         self.RED = RED
         self.CYAN = CYAN
         self.RESET = RESET
+        self.MAGENTA = MAGENTA
         self.BOLD = BOLD
         self.WHITE = WHITE
         self.YELLOW = YELLOW
