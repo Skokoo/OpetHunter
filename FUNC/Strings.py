@@ -14,7 +14,7 @@
 
 import re
 
-class StringsEngine:
+class StringsExtract:
     def __init__(self, shell_instance):
         self.shell = shell_instance
 
