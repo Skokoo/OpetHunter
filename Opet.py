@@ -83,6 +83,7 @@ class Runnow:
         self.cursor = 0x0
         self.base_address = 0x10000000
         self.last_args = None
+        self.modules = modules
 
         try:
             with open(filepath, "rb") as f:
