@@ -14,6 +14,14 @@
 
 import re
 
+RESET = "\033[0m"
+BOLD = "\033[1m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+YELLOW = "\033[93m"
+MAGENTA = "\033[95m"
+WHITE = "\033[97m"
+
 class DisasmEngine:
     def __init__(self, shell_instance):
         self.shell = shell_instance
