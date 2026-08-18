@@ -64,7 +64,7 @@ class Runnow:
                 self.binary_data = bytearray(f.read())
             self.file_size = len(self.binary_data)
         except Exception as e:
-            print(f"[WARNING*] Error reading file: {e}")
+            print(f"[\033[1mWARNING*\033[0m] Error reading file: \033[1m{e}\033[0m")
             sys.exit(1)
         
         self.arch_type = "x86_64"
@@ -100,7 +100,7 @@ class Runnow:
 
     def check_and_print(self, out_str):
         if out_str is None or not isinstance(out_str, str):
-            print("[INFO] Decompiler returned no text or empty block.")
+            print("[\033[1mWARNING\033[0m] Decompiler returned no text or empty block.")
             return
 
         lines = out_str.split("\n")
@@ -122,14 +122,14 @@ class Runnow:
         
         if outfile:
             if os.path.exists(outfile):
-                print(f"[WARNING] File '{outfile}' already exists.")
+                print(f"[\033[1mWARNING\033[0m] File '{outfile}' \033[1malready exists.\033[0m")
                 confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Print): ").strip().lower()
                 
                 if confirm == 'p':
-                    print("\n[INFO] Redirecting output to screen layout.\n")
+                    print("\n[\033[1mINFO\033[0m] Redirecting output to screen layout.\n")
                     outfile = None
                 elif confirm != 'y':
-                    print("[INFO] Export canceled.")
+                    print("[\033[1mINFO\033[0m] Export canceled.")
                     return
             
             if outfile:
@@ -137,18 +137,18 @@ class Runnow:
                     clean_text = re.sub(r'\033\[[0-9;]*m', '', out_str)
                     with open(outfile, "w", encoding="utf-8") as f:
                         f.write(clean_text)
-                    print(f"[INFO] Exported {len(lines)} lines to: {outfile}")
+                    print(f"[\033[1mINFO\033[0m] Exported \033[1m{len(lines)}\033[0m lines to: {outfile}")
                     return
                 except Exception as e:
-                    print(f"[WARNING] Failed to write file: {e}")
+                    print(f"[\033[1mWARNING\033[0m] Failed to write file: \033[1m{e}\033[0m")
         
         char_count = len(out_str)
         lines_count = len(lines)
         if char_count > 1500:
-            ask = input(f"Do you want to print {char_count} chars ({lines_count} lines)? (y/n)").strip().lower()
+            ask = input(f"Do you want to print \033[1m{char_count}\033[0m chars (\033[1m{lines_count}\033[0m lines)? (y/n)").strip().lower()
             whitelist_print = tuple(("y"))
             if ask not in whitelist_print:
-                print("[WARNING] Printing canceled.")
+                print("[\033[1mWARNING\033[0m] Printing canceled.")
                 return              
         print(out_str)    
                    
@@ -161,7 +161,7 @@ class Runnow:
         chunk = self.binary_data[self.cursor : self.cursor + (count * 15)]
         vaddr_start = self.base_address + self.cursor
 
-        lines = [f"\n[INFO] Disassembly at {hex(vaddr_start)}", f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}", "-" * 85]
+        lines = [f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr_start)}", f"{BOLD}Address\t\tHex Bytes\t\tFlow\tInstruction{RESET}", "-" * 85]
         for insn in self.cs.disasm(chunk, vaddr_start):
             hex_bytes = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
 
@@ -197,7 +197,7 @@ class Runnow:
         chunk = self.binary_data[self.cursor : self.cursor + size]
         vaddr_start = self.base_address + self.cursor
 
-        lines = [f"\n[INFO] Hex Dump at {hex(vaddr_start)}", f"  Offset      00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f   ASCII", "-" * 75]
+        lines = [f"\n[\033[1mINFO\033[0m] Hex Dump at {hex(vaddr_start)}", f"  Offset      00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f   ASCII", "-" * 75]
         for i in range(0, len(chunk), 16):
             sub_chunk = chunk[i:i+16]
             hex_str = ""
@@ -274,12 +274,12 @@ class Runnow:
         
         if aask == 'y':
             bad_signals = ()
-            print("[INFO] Sensor Disabled. Output raw emulation bytes.")
+            print("[\033[1mINFO\033[0m] Sensor Disabled. Output raw emulation bytes.")
         else:
             bad_signals = ("fs:", "gs:", "ss:", "ch", "dh", "bh", "ah", "al", "bl", "cl", "dl")
-            print("[INFO] Sensor Enabled. Fidelity code filter active.")
+            print("[\033[1mINFO\033[0m] Sensor Enabled. Fidelity code filter active. Please note that this potentially lead to \033[1mNo Decompiling.\033[0m")
 
-        lines = [f"\n[INFO] Extracting Static Strings & Decompiling Associated Code..."]      
+        lines = [f"\n[\033[1mINFO\033[0m] Extracting Static Strings & Decompiling Associated Code..."]      
 
         matches = re.finditer(b"[\x20-\x7E]{5,}", self.binary_data)
         elf_sections = (".fini_array", ".init_array", ".text", ".data", ".rodata", 
@@ -329,9 +329,9 @@ class Runnow:
 
         if aask == 'y':
             print(f"\n{BOLD}[TIPS]{RESET}")
-            print("[i] Don't forget to check the output, don't get fooled by null bytes.")
-            print("[i] Since you bypassed the sensor, most of the data above is padding noise (+= ch/al).")
-            print("[i] But, just keep scrolling and don't be lazy to scan... you might encounteted a gold.\n")
+            print("[i] Don't forget to check the output, \033[1mdon't get fooled by null bytes.\033[0m")
+            print("[i] Most of the data above is padding noise (+= ch/al).")
+            print("[i] But, just keep scrolling and don't be lazy to scan... \033[1myou might encounteted a 'gold'.\033[0m\n")
             print(f"{BOLD}[Example of Null Bytes]{RESET}")
             print(f"    // Loop recovery or code block containing constant junk:")
             print(f"    {{")
@@ -348,7 +348,7 @@ class Runnow:
 
     def find_xrefs(self):
         target_vaddr = self.base_address + self.cursor
-        lines = [f"\n[INFO] Scanning XREFs for address: {hex(target_vaddr)}..."]
+        lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target_vaddr)}..."]
         found_xrefs = 0
 
         for insn in self.cs.disasm(self.binary_data, self.base_address):
@@ -358,12 +358,12 @@ class Runnow:
                     found_xrefs += 1
 
         if found_xrefs == 0:
-            lines.append("[ERROR] No external XREFs found for this address.")
+            lines.append("[\033[1mERROR\033[0m] No external XREFs found for this address.")
         lines.append("")
         self.check_and_print("\n".join(lines))
 
     def analyze_entropy_map(self):
-        lines = [f"\n[INFO] Shannon Entropy Analysis", "Block\tVirtual Addr\tScore\t\tStatus / Graph", "-" * 75]
+        lines = [f"\n[\033[1mINFO\033[0m] Shannon Entropy Analysis", "Block\tVirtual Addr\tScore\t\tStatus / Graph", "-" * 75]
         block_size = 512
 
         for i in range(0, self.file_size, block_size):
@@ -436,9 +436,9 @@ class Runnow:
                         if pseudo_c is not None:
                             self.check_and_print(pseudo_c)
                         else:
-                            print("[ERROR] Decompiler returned empty data.")
+                            print("[\033[1mERROR\033[0m] Decompiler returned empty data.")
                     else:
-                        print("[WARNING] Cursor position near EOF. Cannot decompile out of bounds.")
+                        print("[\033[1mWARNING\033[0m] Cursor position near EOF. Cannot decompile out of bounds.")
                 elif cmd == "ae": self.analyze_entropy_map()
                 elif cmd == "iz": self.print_strings(args)
                 elif cmd == "info":                     
@@ -452,17 +452,17 @@ class Runnow:
                         if 0 <= (val - self.base_address) <= self.file_size:
                             self.cursor = val - self.base_address
                         else:
-                            print("[WARNING] Address out of bounds.")
+                            print("[\033[1mWARNING\033[0m] Address out of bounds.")
                     except ValueError:
-                        print("[WARNING] Invalid address format.")
+                        print("[\033[1mWARNING\033[0m] Invalid address format.")
                 else:
-                    print("[WARNING] Unknown command. Type 'help' for options.")
+                    print("[\033[1mWARNING\033[0m] Unknown command. Type \033[1m'help'\033[0m for options.")
             except (KeyboardInterrupt, EOFError):                
                 break
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} <binary_path>")
+        print(f"Usage: \033[1mpython {sys.argv[0]} <binary_path>\033[0m")
         sys.exit(1)
 
     engine = Runnow(sys.argv[1])
