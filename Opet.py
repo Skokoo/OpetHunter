@@ -185,7 +185,7 @@ class Runnow:
                 print("[\033[1mWARNING\033[0m] Printing canceled.")
                 return            
                 
-         print(out_str)
+          print(out_str)
 
     def translate_bytes_to_c(self, chunk, start_vaddr):
         c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
