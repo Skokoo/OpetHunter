@@ -69,28 +69,50 @@ class Analyze:
         lines.append("")
         return "\n".join(lines)
 
+class Analyze:
+    def __init__(self, instance):
+        self.shell = instance
+
     def EntropyMap(self):
-        lines = [f"\n[\033[1mINFO\033[0m] Shannon Entropy Analysis", "Block\tVirtual Addr\tScore\t\tStatus / Graph", "-" * 75]
-        block_size = 512
+        size = self.shell.file_size
+        block = 512
+        if size > 5000000:
+            block = 65536
+        elif size > 1000000:
+            block = 4096
+        elif size > 500000:
+            block = 2048
 
-        RED = self.shell.RED
-        YELLOW = self.shell.YELLOW
-        GREEN = self.shell.GREEN
-        BOLD = self.shell.BOLD
-        RESET = self.shell.RESET
+        lines = [
+            f"\n[\033[1mINFO\033[0m] Shannon Entropy Analysis (Block Size: {block} bytes)", 
+            "Block\tVirtual Addr\tScore\t\tStatus / Graph", 
+            "-" * 75
+        ]
 
-        for i in range(0, self.shell.file_size, block_size):
-            block = self.shell.binary_data[i:i+block_size]
-            entropy = self.shell.calculate_entropy(block)
-            bar_len = int(entropy * 4)
-            chart = "█" * bar_len
-            vaddr = self.shell.base_address + i
-
-            if entropy > 6.5:   
-                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{RED}{BOLD}[PACKED] {RESET} {RED}{chart}{RESET}")
-            elif entropy > 4.5: 
-                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{YELLOW}[CODE]   {RESET} {YELLOW}{chart}{RESET}")
+        red = self.shell.RED
+        yellow = self.shell.YELLOW
+        green = self.shell.GREEN
+        bold = self.shell.BOLD
+        reset = self.shell.RESET
+        
+        charts = ["█" * int(e * 3.5) for e in [x * 0.05 for x in range(161)]]
+        
+        for index in range(0, size, block):
+            chunk = self.shell.binary_data[index : index + block]
+            entropy = self.shell.calculate_entropy(chunk)           
+            
+            chart = charts[min(160, max(0, int(entropy * 20)))]
+            vaddr = self.shell.base_address + index
+            number = index // block
+            
+            if entropy > 6.8:   
+                status = f"{red}{bold}[PACKED]{reset} {red}{chart}{reset}"
+            elif entropy > 4.2: 
+                status = f"{yellow}[CODE]  {reset} {yellow}{chart}{reset}"
             else:               
-                lines.append(f"#{i//block_size}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{GREEN}[DATA]   {RESET} {GREEN}{chart}{RESET}")
+                status = f"{green}[DATA]  {reset} {green}{chart}{reset}"
+
+            lines.append(f"#{number}\t{hex(vaddr)}\t{entropy:.2f}/8.0\t{status}")
+            
         lines.append("")
         return "\n".join(lines)
