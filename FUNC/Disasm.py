@@ -22,7 +22,7 @@ YELLOW = "\033[93m"
 MAGENTA = "\033[95m"
 WHITE = "\033[97m"
 
-class DisasmEngine:
+class Disasm:
     def __init__(self, shell_instance):
         self.shell = shell_instance
 
