@@ -327,6 +327,7 @@ class Runnow:
         lines.append("")
         self.check_and_print("\n".join(lines))
 
+    if ask == 'y':
         if aask == 'y':
             print(f"\n{BOLD}[TIPS]{RESET}")
             print("[i] Don't forget to check the output, don't get fooled by null bytes.")
