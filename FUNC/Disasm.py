@@ -31,7 +31,7 @@ class Disasm:
         architecture = "x86"
         if len(binary) >= 20:
             machine = binary[18]
-            if machine == 0xb7
+            if machine == 0xb7:
                 architecture = "arm"
 
         
