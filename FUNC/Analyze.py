@@ -16,18 +16,59 @@ class Analyze:
     def __init__(self, shell_instance):
         self.shell = shell_instance
 
+class Analyze:
+    def __init__(self, instance):
+        self.shell = instance
+
     def runXREF(self, args):
-        target_vaddr = self.shell.base_address + self.shell.cursor
-        lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target_vaddr)}..."]
-        found_xrefs = 0
+        target = self.shell.base_address + self.shell.cursor
+        lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target)}..."]
+        found = 0
+       
+        architecture = "x86"
+        if len(self.shell.binary_data) >= 20:
+            if self.shell.binary_data[18] == 0xb7:
+                architecture = "arm"
+
+        bold = self.shell.BOLD
+        reset = self.shell.RESET
+        white = self.shell.WHITE
+        magenta = self.shell.MAGENTA
+        red = self.shell.RED
 
         for insn in self.shell.cs.disasm(self.shell.binary_data, self.shell.base_address):
-            if insn.mnemonic.startswith('j') or insn.mnemonic == 'call':
-                if hex(target_vaddr) in insn.op_str:
-                    lines.append(f"  [XREF] Found at {hex(insn.address)} -> ({insn.mnemonic} {insn.op_str})")
-                    found_xrefs += 1
+            mnemonic = insn.mnemonic        
+            
+            is_branch = mnemonic.startswith('j') or mnemonic in ['call', 'b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']
+            if not is_branch:
+                continue
 
-        if found_xrefs == 0:
+            destination = None
+            
+            if len(insn.operands) > 0:
+                operand = insn.operands[0]
+                if hasattr(operand, 'imm'):
+                    destination = operand.imm
+            
+            if destination is None:
+                match = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
+                if match:
+                    destination = int(match.group(0), 16)
+            
+            if destination is None and "rip" in insn.op_str:
+                match = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
+                if match:
+                    offset = int(match.group(0), 16)                   
+                    destination = insn.address + insn.size + offset
+           
+            if destination == target:
+                color = red if mnemonic.startswith('j') or mnemonic in ['b', 'br', 'cbz', 'cbnz', 'tbz', 'tbnz'] else magenta
+                flow = "[JMP]" if mnemonic.startswith('j') or mnemonic in ['b', 'br', 'cbz', 'cbnz', 'tbz', 'tbnz'] else "[CALL]"
+                
+                lines.append(f"  {white}{flow}{reset} Found at {hex(insn.address)} -> ({color}{bold}{mnemonic}{reset} {insn.op_str})")
+                found += 1
+
+        if found == 0:
             lines.append("[\033[1mERROR\033[0m] No external XREFs found for this address.")
         lines.append("")
         return "\n".join(lines)
