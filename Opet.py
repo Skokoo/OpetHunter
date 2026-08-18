@@ -186,7 +186,7 @@ class Runnow:
                 return            
                 print(out_str)
 
-def translate_bytes_to_c(self, chunk, start_vaddr):
+    def translate_bytes_to_c(self, chunk, start_vaddr):
         c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
         last_cmp = ""      
         
