@@ -42,6 +42,14 @@ except ImportError:
     print(f"[ERROR] The file 'Info.py' NOT found IN dir: {info_folder_path}")
     sys.exit(1)
 
+func_map = {
+            "pd": ("Disasm", "Disasm),
+            "px": ("HexDump", "Hexdump"),
+            "iz": ("Strings", "StringsExtract"),
+            "ax": ("Analyze", "Analyze"),
+            "ae": ("Analyze", "EntropyMap")
+        }
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
