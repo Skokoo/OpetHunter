@@ -55,9 +55,8 @@ except ImportError:
                 ("Disasm", "Disasm"),
                 ("HexDump", "Hexdump"),
                 ("Strings", "StringsExtract"),
-                ("Analyze", "Analyze"),     
-                ("Analyze", "EntropyMap"),        
-            ]
+                ("Analyze", "Analyze")
+            ]            
             
             for file_name, class_name in import_targets:
                 try:
