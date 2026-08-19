@@ -36,16 +36,16 @@ class Integrity:
         
         corrupted = shoff >= size or (shoff + (shnum * 64) > size) if shnum > 0 else False       
         
-        status_table = f"{red}{bold}[TAMPERED] Section Header Table points to invalid EOF bounds!{reset}" if corrupted else f"{green}INTECT (Standard Linux Section Mapping){reset}"
+        status_table = f"[{bold}INFO{reset}] Section Header Table points to invalid EOF bounds.{reset}" if corrupted else f"{bold}INTECT (Standard Linux Section Mapping){reset}"
         lines.append(f"  * Header Integrity : {status_table}")
         
         flat_str = binary.lower()
         is_stripped = b".symtab" not in flat_str and b".strtab" not in flat_str
-        status_symbols = f"STRIPPED (Function names hidden by developer){reset}" if is_stripped else f"NOT STRIPPED (Debug symbols available){reset}"
+        status_symbols = f"[{bold}INFO{reset}] Function names hidden by developer" if is_stripped else f"[{bold}INFO{reset}] Debug symbols available"
         lines.append(f"  * Symbol Visibility: {status_symbols}")
         
         has_rwx = b"mprotect" in flat_str or b"ptrace" in flat_str
-        status_rwx = f"[{bold}WARNING{reset}] Contains dynamic injection or trace hooks primitives!" if has_rwx else f"{bold}CLEAN: (No malicious hook signatures found){reset}"
+        status_rwx = f"[{bold}WARNING{reset}] Contains dynamic injection or trace hooks primitives." if has_rwx else f"[{bold}INFO{reset}] No malicious hook signatures found"
         lines.append(f"  * Threat Indicators: {status_rwx}")
         
         verdict = f"[{bold}ALERT{reset}] This file shows anti analysis or tampering characteristics." if (corrupted or has_rwx) else f"{green}{bold}[{bold}INFO{reset}] Binary template structures comply with standard runtime rules."
