@@ -30,4 +30,4 @@ class Seeker:
         yellow = getattr(self.shell, 'YELLOW', '\033[93m')
         cyan = getattr(self.shell, 'CYAN', '\033[96m')
 
-        return f"  Cursor synchronized to: {hex(val)}" if val == suggest else f"  Cursor synchronized to: {hex(val)} {yellow}{bold}[WARNING: Inside Data/Padding]{reset}\n  -> {cyan}{bold}Nearest valid function entry point found at: {hex(suggest)}{reset}"
+        return f"  Cursor synchronized to: {hex(val)}" if val == suggest else f"\n  Cursor synchronized to: {hex(val)} {yellow}{bold}[WARNING: Inside Data/Padding]{reset}\n  -> {bold}Nearest valid function entry point found at: {hex(suggest)}{reset}\n"
