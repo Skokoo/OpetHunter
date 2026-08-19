@@ -57,6 +57,7 @@ else:
         ("HexDump", "Hexdump"),
         ("Strings", "StringsExtract"),
         ("Analyze", "Analyze")
+        ("Seeker", "Seeker")
     ]            
 
     for file_name, class_name in import_targets:
