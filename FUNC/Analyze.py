@@ -12,6 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# You are not expected to understand this.
+# This code violates PEP-8 and standard OOP.
+# to achieve execution speed under native C-backends.
+
 import re
 
 class Analyze:
