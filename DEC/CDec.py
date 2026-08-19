@@ -18,31 +18,27 @@ import json
 from capstone import *
 
 class CapstoneDecompiler:
-    def __init__(self, binary_bytes, base_address):
-        self.binary_data = binary_bytes
-        self.base_address = base_address
+    def __init__(self, binary, base):
+        self.binary_data = binary
+        self.base_address = base
         self.cs = Cs(CS_ARCH_X86, CS_MODE_64)
         self.cs.detail = True       
-        
         self.reg_cleaner = {}
         try:
-            current_dir = os.path.dirname(os.path.abspath(__file__))
-            json_path = os.path.join(current_dir, "reg_map.json")
-            with open(json_path, "r") as f:
-                config = json.load(f)
-            self.reg_cleaner = {k: v["clean_name"] for k, v in config["registers"].items()}
+            folder = os.path.dirname(os.path.abspath(__file__))
+            config = os.path.join(folder, "reg_map.json")
+            with open(config, "r") as stream:
+                data = json.load(stream)
+            self.reg_cleaner = {key: val["clean_name"] for key, val in data["registers"].items()}
         except:           
             pass
 
     def clean_operand(self, op_str):        
         clean = op_str.replace("qword ptr", "").replace("dword ptr", "")
         clean = clean.replace("byte ptr", "").replace("word ptr", "").strip()       
-
-        stack_match = re.search(r'\[(rbp|rsp)\s*([-+])\s*(0x[0-9a-fA-F]+|[0-9]+)\]', clean)
-        if stack_match:
-            offset = stack_match.group(3)
-            return f"local_var_{offset}h"            
-
+        match = re.search(r'\[(rbp|rsp)\s*([-+])\s*(0x[0-9a-fA-F]+|[0-9]+)\]', clean)
+        if match:
+            return f"local_var_{match.group(3)}h"            
         for reg, var in self.reg_cleaner.items():
             clean = re.sub(rf'\b{reg}\b', var, clean)
         return clean
@@ -52,112 +48,87 @@ class CapstoneDecompiler:
             if insn.mnemonic == "lea" and "rip" in insn.op_str:
                 match = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
                 if match:
-                    offset = int(match.group(), 16)                    
-                    target_offset = (insn.address + insn.size + offset) - self.base_address
-                    if 0 <= target_offset < len(self.binary_data):                        
-                        chunk = self.binary_data[target_offset : target_offset + 32]
-                        str_match = re.match(b"[\x20-\x7E]{4,}", chunk)
-                        if str_match:
-                            clean_str = str_match.group().decode('ascii', errors='ignore')
-                            return f'"{clean_str}"'
+                    target = (insn.address + insn.size + int(match.group(), 16)) - self.base_address
+                    if 0 <= target < len(self.binary_data):                        
+                        chunk = self.binary_data[target : target + 32]
+                        regex = re.match(b"[\x20-\x7E]{4,}", chunk)
+                        if regex:
+                            return f'"{regex.group().decode("ascii", errors="ignore")}"'
         except:
             pass
         return None 
-    def run_decompile(self):       
-        in_function = False
-        func_counter = 0
-        indent = "        "
-        output_lines = []
 
+    def run_decompile(self):       
+        active = False
+        indent = "        "
+        lines = []
         try:
             instructions = list(self.cs.disasm(self.binary_data, self.base_address))
         except:
             return "    // disassembly critical failure."
-
         if not instructions:
             return "    // No valid execution to decompile."
+        
+        loops = {int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) for ins in instructions if (ins.mnemonic == "jmp" or ins.mnemonic.startswith("j")) and (lambda t: t < ins.address)(int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) if ins.op_str.isdigit() else 0)}
+        
+        math_signs = {"add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>="}
+        comp_signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
+        
+        handlers = {
+            "lea": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {res if res else f'&({ops[1]})'};",
+            "mov": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {ops[1]};",
+            "xor": lambda ops, ins, res, ind: f"{ind}{ops[0]} = 0;" if ops[0] == ops[1] else f"{ind}{ops[0]} ^= {ops[1]};",
+            "call": lambda ops, ins, res, ind: f"{ind}sub_{','.join(ops)}();"
+        }
 
-        loop_starts = set()
-        for insn in instructions:
-            if insn.mnemonic == "jmp" or insn.mnemonic.startswith("j"):
-                try:
-                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)                   
-                    if target_addr < insn.address:
-                        loop_starts.add(target_addr)
-                except:
-                    pass
-
-        for i, insn in enumerate(instructions):                       
-            if insn.address in loop_starts:                
-                output_lines.append(f"{indent}while (status_flag) {{ // Loop Recovery Triggered")
+        for index, insn in enumerate(instructions):                       
+            if insn.address in loops:                
+                lines.append(f"{indent}while (status_flag) {{ // Loop Recovery Triggered")
                 indent += "    "
 
             if insn.mnemonic == "push" and "rbp" in insn.op_str:
-                func_counter += 1
-                in_function = True
-                output_lines.append(f"    // Function detected at {hex(insn.address)}")
-                output_lines.append(f"    void function_{hex(insn.address)}() {{")
+                active = True
+                lines.append(f"    // Function detected at {hex(insn.address)}\n    void function_{hex(insn.address)}() {{")
                 continue
 
-            if not in_function and i == 0:
-                in_function = True                
-                output_lines.append(f"    void entry_point_{hex(insn.address)}() {{")
+            if not active and index == 0:
+                active = True                
+                lines.append(f"    void entry_point_{hex(insn.address)}() {{")
 
-            clean_op = self.clean_operand(insn.op_str)
-            ops = [o.strip() for o in clean_op.split(",")] if "," in clean_op else [clean_op]
-            resolved_str = self.resolve_inline_string(insn)
-
-            if insn.mnemonic == "lea" and len(ops) == 2:
-                val = resolved_str if resolved_str else f"&({ops[1]})"
-                output_lines.append(f"{indent}{ops[0]} = {val};")
-            elif insn.mnemonic == "mov" and len(ops) == 2:
-                output_lines.append(f"{indent}{ops[0]} = {ops[1]};")
-            elif insn.mnemonic == "xor" and len(ops) == 2:
-                if ops[0] == ops[1]: output_lines.append(f"{indent}{ops[0]} = 0;")
-                else: output_lines.append(f"{indent}{ops[0]} ^= {ops[1]};")
-            elif insn.mnemonic in ["add", "sub", "imul", "and", "or", "shl", "shr"] and len(ops) == 2:
-                sign_map = {"add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>="}
-                output_lines.append(f"{indent}{ops[0]} {sign_map[insn.mnemonic]} {ops[1]};")
-            elif insn.mnemonic == "call":
-                output_lines.append(f"{indent}sub_{clean_op}();")
-
-            elif insn.mnemonic.startswith("j") and insn.mnemonic != "jmp":
-                condition = "status_flag"                
-                if i > 0 and instructions[i-1].mnemonic == "cmp":
-                    prev_clean = self.clean_operand(instructions[i-1].op_str)
-                    prev_ops = [o.strip() for o in prev_clean.split(",")]
-                    if len(prev_ops) == 2:                        
-                        signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
-                        op_sign = signs.get(insn.mnemonic, "==")
-                        condition = f"{prev_ops[0]} {op_sign} {prev_ops[1]}"
-
+            clean = self.clean_operand(insn.op_str)
+            ops = [part.strip() for part in clean.split(",")] if "," in clean else [clean]
+            resolved = self.resolve_inline_string(insn)
+            mnemonic = insn.mnemonic
+            
+            if mnemonic in handlers and len(ops) >= 2 if mnemonic != "call" else len(ops) >= 1:
+                lines.append(handlers[mnemonic](ops, insn, resolved, indent))
+            elif mnemonic in math_signs and len(ops) == 2:
+                lines.append(f"{indent}{ops[0]} {math_signs[mnemonic]} {ops[1]};")
+            elif mnemonic.startswith("j") or mnemonic == "jmp":
                 try:
-                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
-                    if target_addr < insn.address:
+                    target = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
+                    if target < insn.address:
                         indent = indent[:-4] if len(indent) > 8 else "        "
-                        output_lines.append(f"{indent}}} // End of While Loop")
+                        lines.append(f"{indent}}} // End of While Loop")
                         continue
                 except:
                     pass
-                output_lines.append(f"{indent}if ({condition}) {{ goto block_{clean_op}; }}")
 
-            elif insn.mnemonic == "jmp":
-                try:
-                    target_addr = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
-                    if target_addr < insn.address:
-                        indent = indent[:-4] if len(indent) > 8 else "        "
-                        output_lines.append(f"{indent}}} // End of While Loop")
-                        continue
-                except:
-                    pass
-                output_lines.append(f"{indent}goto block_{clean_op};")
-            elif insn.mnemonic in ["ret", "hlt"]:
-                output_lines.append(f"{indent}return;")
-                output_lines.append("    }")
-                in_function = False
+                if mnemonic == "jmp":
+                    lines.append(f"{indent}goto block_{clean};")
+                else:
+                    condition = "status_flag"
+                    if index > 0 and instructions[index - 1].mnemonic == "cmp":
+                        prev_ops = [p.strip() for p in self.clean_operand(instructions[index - 1].op_str).split(",")]
+                        if len(prev_ops) == 2:
+                            condition = f"{prev_ops[0]} {comp_signs.get(mnemonic, '==')} {prev_ops[1]}"
+                    lines.append(f"{indent}if ({condition}) {{ goto block_{clean}; }}")
+            elif mnemonic in ["ret", "hlt"]:
+                lines.append(f"{indent}return;\n    }}")
+                active = False
 
-        if in_function:
-            output_lines.append(f"{indent}return;")
-            output_lines.append("    }")                   
+        if active:
+            lines.append(f"{indent}return;\n    }}")                   
 
-        return "\n".join(output_lines) if output_lines else "    // disassembly block."
+        return "\n".join(lines) if lines else "    // disassembly block."
+                        
