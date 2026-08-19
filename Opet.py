@@ -313,19 +313,13 @@ class Runnow:
                     rep = engine.run_pipeline()
                     self.check_and_print(rep)
                 elif cmd == "s" and args:
-                    try:
-                        target = args[0]
-                        val = int(target, 16) if target.startswith("0x") else int(target)
-                        if 0 <= (val - self.base_address) <= self.file_size:
-                            self.cursor = val - self.base_address
-                        else:
-                            print("[\033[1mWARNING\033[0m] Address out of bounds.")
-                    except ValueError:
-                        print("[\033[1mWARNING\033[0m] Invalid address format.")
+                    if "Seeker" in self.modules:
+                        self.check_and_print(self.modules["Seeker"](self).run(args))
+
                 else:
                     print("[\033[1mWARNING\033[0m] Unknown command. Type \033[1m'help'\033[0m for options.")
             except (KeyboardInterrupt, EOFError):                
-                break             
+                break         
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
