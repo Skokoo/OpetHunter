@@ -41,7 +41,10 @@ class InfoValidator:
             "Lang   :": "  * Lang   : None (Plain Text)",
             "Target :": "  * Target : None"
         }
-        
+
+        # This is just a "Nested List Comprehension Masking"
+        # Replaces complex file manipulation branches with an instantaneous stream array builder.
+        # Avoids repetitive array allocation (.append()) to protect mobile device heap memory.
         lines = [
             (mask[next(key for key in mask if key in line)] if text and any(key in line for key in mask)
              else (line.replace("UPX", "\033[91m\033[1m[CRITICAL] UPX\033[0m") if "UPX" in line and not text else line))
