@@ -276,7 +276,7 @@ class Runnow:
                 elif cmd == "px":
                     if "Hexdump" in self.modules:
                         self.check_and_print(self.modules["Hexdump"](self).run(args))
-elif cmd == "ai":
+
                 elif cmd == "ai"
                     if "Integrity" in self.modules:
                         self.check_and_print(self.modules["Integrity"](self).run(args))
