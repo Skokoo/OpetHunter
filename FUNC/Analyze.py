@@ -32,7 +32,11 @@ class Analyze:
             
             if not (mnemonic.startswith('j') or mnemonic in ['call', 'b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
                 continue
-            
+           
+            # WARNING: Do not refractor or split into mutiple lines.
+            # This is intentionally chained into a single expression to eliminate Python 
+            # local stack allocation overhead, ensuring "instant" ax scanning.
+            # Logic is simple i guess. Extracts Imm -> Regex Hex Fallback -> RIP-Relative Address Formula.                  
             match_obj = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
             destination = insn.operands[0].imm if (len(insn.operands) > 0 and hasattr(insn.operands[0], 'imm')) else (int(match_obj.group(0), 16) if match_obj and "rip" not in insn.op_str else (insn.address + insn.size + int(match_obj.group(0), 16) if match_obj and "rip" in insn.op_str else None))
             
