@@ -13,9 +13,6 @@ class Integrity:
         bold = getattr(self.shell, 'BOLD', '\033[1m')
         reset = getattr(self.shell, 'RESET', '\033[0m')
         white = getattr(self.shell, 'WHITE', '\033[97m')
-        red = getattr(self.shell, 'RED', '\033[91m')
-        green = getattr(self.shell, 'GREEN', '\033[92m')
-        yellow = getattr(self.shell, 'YELLOW', '\033[93m')
 
         lines = [
             f"\n============================================================",
@@ -27,7 +24,7 @@ class Integrity:
         if len(binary) < 4 or list(binary[:4]) != [0x7f, 0x45, 0x4c, 0x46]:           
             return f"[\033[1mWARNING\033[0m] Command 'ai' is optimized for ELF/Native .so binaries. Format mismatched."
 
-        lines.append(f"  * ELF Magic Status : {green}VALID (7f 45 4c 46){reset}")
+        lines.append(f"  * ELF Magic Status : {bold}Valid/ok (7f 45 4c 46){reset}")
      
         # Offset 0x28 (40): Start of section headers (e_shoff)
         # Offset 0x3a (58): Number of section headers (e_shnum)
@@ -51,6 +48,6 @@ class Integrity:
         verdict = f"[{bold}ALERT{reset}] This file shows anti analysis or tampering characteristics." if (corrupted or has_rwx) else f"{green}{bold}[{bold}INFO{reset}] Binary template structures comply with standard runtime rules."
         
      
-        lines.append(f"  * Final verdict   : {verdict}")       
+        lines.append(f"  * Final verdict    : {verdict}")       
 
         return "\n".join(lines)
