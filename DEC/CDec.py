@@ -73,7 +73,11 @@ class CapstoneDecompiler:
         
         math_signs = {"add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>="}
         comp_signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
-        
+
+        # Dictionary based lambda call back.
+        # Bypasses CPU branch misprediction overhead caused by "if-elif" chains.
+        # This forces the Python interpreter to jump directly to the instruction handler 
+        # in constant "O(1)" time complexity, maximizing pseudo-C rendering frame rates.
         handlers = {
             "lea": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {res if res else f'&({ops[1]})'};",
             "mov": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {ops[1]};",
