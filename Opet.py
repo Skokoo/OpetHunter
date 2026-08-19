@@ -281,7 +281,7 @@ class Runnow:
                     if "Integrity" in self.modules:
                         self.check_and_print(self.modules["Integrity"](self).run(args))
 
-                elif cmd == "iz"
+                elif cmd == "iz":
                     if "StringsExtract" in self.modules:                      
                         self.modules["StringsExtract"](self).run(args)
               
