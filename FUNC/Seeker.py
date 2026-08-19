@@ -13,10 +13,10 @@ class Seeker:
         try:
             val = int(target, 16) if target.startswith("0x") else int(target)
         except ValueError:
-            return "[\033[1mWARNING\033[0m] Invalid address format."
+            return "\n[\033[1mWARNING\033[0m] Invalid address format.\n"
         
         if not (0 <= (val - base) <= size):
-            return "[\033[1mWARNING\033[0m] Address out of bounds."
+            return "\n[\033[1mWARNING\033[0m] Address out of bounds.\n"
         
         points = [base + idx for idx, byte in enumerate(binary) if byte in (0x55, 0xc3)]        
         
