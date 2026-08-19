@@ -62,6 +62,6 @@ class Integrity:
         verdict = f"[{bold}ALERT{reset}] This file shows anti analysis or tampering characteristics." if (corrupted or has_rwx) else f"{green}{bold}[{bold}INFO{reset}] Binary template structures comply with standard runtime rules."
         
      
-        lines.append(f"  * Final verdict    : {verdict}"\n)       
+        lines.append(f"  * Final verdict    : {verdict}\n")       
 
         return "\n".join(lines)
