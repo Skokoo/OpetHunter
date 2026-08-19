@@ -24,8 +24,8 @@ class Integrity:
             f"  * Target File Size : {size} bytes"
         ]
         
-        if magic != b"\x7fELF":
-            return f"[\033[1mWARNING\033[0m] Command 'ai' is optimized for ELF/Native .so binaries. Format mismatch detected."
+        if len(binary) < 4 or list(binary[:4]) != [0x7f, 0x45, 0x4c, 0x46]:           
+            return f"[\033[1mWARNING\033[0m] Command 'ai' is optimized for ELF/Native .so binaries. Format mismatched."
 
         lines.append(f"  * ELF Magic Status : {green}VALID (7f 45 4c 46){reset}")
      
