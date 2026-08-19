@@ -23,38 +23,24 @@ class Disasm:
         if args and isinstance(args, list) and len(args) > 0:
             try: count = int(args[0])
             except: pass
-
+     
         cursor = self.shell.cursor
-        base = self.shell.base_address
-        binary = self.shell.binary_data       
+        binary = self.shell.binary_data            
+        architecture = "arm" if len(binary) >= 20 and binary[18] == 0xb7 else "x86"     
+        chunk = binary[cursor : cursor + (count * 4 if architecture == "arm" else count * 15)]
+        vaddr = self.shell.base_address + cursor
         
-        architecture = "x86"
-        if len(binary) >= 20:
-            machine = binary[18]
-            if machine == 0xb7:
-                architecture = "arm"
-
-        
-        size = count * 4 if architecture == "arm" else count * 15
-        chunk = binary[cursor : cursor + size]
-        vaddr = base + cursor
-
-        bold = self.shell.BOLD
-        reset = self.shell.RESET
-        white = self.shell.WHITE
-        red = self.shell.RED
-        magenta = self.shell.MAGENTA
-        yellow = self.shell.YELLOW
-        green = self.shell.GREEN
+        bold, reset, white = self.shell.BOLD, self.shell.RESET, self.shell.WHITE
+        red, magenta, yellow, green = self.shell.RED, self.shell.MAGENTA, self.shell.YELLOW, self.shell.GREEN
 
         lines = [
             f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'arm' else 'x86_64'})", 
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
         ]       
-        
-        pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|x\d+|w\d+|sp|wsp|pc|lr)\b' if architecture == "arm" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
 
+        pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|x\d+|w\d+|sp|wsp|pc|lr)\b' if architecture == "arm" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
+        
         index = 0
         for insn in self.shell.cs.disasm(chunk, vaddr):
             if index >= count: 
@@ -62,6 +48,7 @@ class Disasm:
             
             bytes_str = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
             operands = insn.op_str
+                       
             operands = re.sub(pattern, f"{bold}\\1{reset}", operands)
             operands = re.sub(r'(0x[0-9a-fA-F]+)', f"{bold}\\1{reset}", operands)
 
@@ -79,9 +66,9 @@ class Disasm:
                 flow = f"{yellow}└── [END]{reset}"
             elif mnemonic in ['xor', 'sub', 'add', 'cmp', 'eor', 'subs', 'adds']:
                 mnemonic = f"{green}{mnemonic}{reset}"
-            
+
             lines.append(f"  {white}{hex(insn.address)}{reset}\t{bytes_str}\t{flow}\t{mnemonic} {operands}")
             index += 1
-            
+
         lines.append("-" * 85 + "\n")
         return "\n".join(lines)
