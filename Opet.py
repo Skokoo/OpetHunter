@@ -56,7 +56,7 @@ else:
         ("Disasm", "Disasm"),
         ("HexDump", "Hexdump"),
         ("Strings", "StringsExtract"),
-        ("Analyze", "Analyze")
+        ("Analyze", "Analyze"),
         ("Seeker", "Seeker")
     ]            
 
