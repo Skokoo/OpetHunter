@@ -174,42 +174,43 @@ class Runnow:
         c_lines = [f"    // Auto-Decompile Code Block at {hex(start_vaddr)} ", "    {"]
         last_cmp = ""      
         
-        if hasattr(self, 'arch_type') and self.arch_type == "aarch64":
-            reg_map = {"x0": "arg1", "x1": "arg2", "x2": "arg3", "x3": "arg4", "w0": "arg1_32"}
-        else:
-            reg_map = {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
+        reg_map = {"x0": "arg1", "x1": "arg2", "x2": "arg3", "x3": "arg4", "w0": "arg1_32"} if (hasattr(self, 'arch_type') and self.arch_type == "aarch64") else {"rdi": "arg1", "rsi": "arg2", "rdx": "arg3", "rcx": "arg4", "rax": "local_res"}
+        
+        handlers = {
+            "mov": lambda o, i: f"        {o[0].strip()} = {o[1].strip()};",
+            "ldr": lambda o, i: f"        {o[0].strip()} = {o[1].strip()};",
+            "str": lambda o, i: f"        {o[0].strip()} = {o[1].strip()};",
+            "movz": lambda o, i: f"        {o[0].strip()} = {o[1].strip()};",
+            "add": lambda o, i: f"        {o[0].strip()} += {o[1].strip()};",
+            "sub": lambda o, i: f"        {o[0].strip()} -= {o[1].strip()};",
+            "subs": lambda o, i: f"        {o[0].strip()} -= {o[1].strip()};",
+            "xor": lambda o, i: f"        {o[0].strip()} = 0;" if o[0].strip() == o[1].strip() else f"        {o[0].strip()} ^= {o[1].strip()};",
+            "eor": lambda o, i: f"        {o[0].strip()} = 0;" if o[0].strip() == o[1].strip() else f"        {o[0].strip()} ^= {o[1].strip()};",
+            "call": lambda o, i: f"        sub_{i.op_str.strip()}();",
+            "bl": lambda o, i: f"        sub_{i.op_str.strip()}();",
+            "blr": lambda o, i: f"        sub_{i.op_str.strip()}();",
+        }
 
         for insn in self.cs.disasm(chunk, start_vaddr):
             op = insn.op_str
             for r, v in reg_map.items():
                 op = re.sub(rf'\b{r}\b', v, op)          
-            if insn.mnemonic in ["mov", "ldr", "str", "movz"]:
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} = {parts[1].strip()};")
-            elif insn.mnemonic == "add":
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} += {parts[1].strip()};")
-            elif insn.mnemonic in ["sub", "subs"]:
-                parts = op.split(",")
-                if len(parts) == 2: c_lines.append(f"        {parts[0].strip()} -= {parts[1].strip()};")           
-            elif insn.mnemonic in ["xor", "eor"]:
-                parts = op.split(",")
-                if len(parts) == 2:
-                    if parts[0].strip() == parts[1].strip(): c_lines.append(f"        {parts[0].strip()} = 0;")
-                    else: c_lines.append(f"        {parts[0].strip()} ^= {parts[1].strip()};")
-            elif insn.mnemonic == "cmp":
+            
+            mnemonic = insn.mnemonic
+            parts = op.split(",")
+            
+            if mnemonic in handlers and (len(parts) == 2 or mnemonic in ["call", "bl", "blr"]):
+                c_lines.append(handlers[mnemonic](parts, insn))
+            elif mnemonic == "cmp":
                 last_cmp = op.replace(",", " == ")           
-            elif insn.mnemonic in ["je", "b.eq"] and last_cmp:
+            elif mnemonic in ["je", "b.eq"] and last_cmp:
                 c_lines.append(f"        if ({last_cmp}) {{ // branch")
-            elif insn.mnemonic in ["jne", "b.ne"] and last_cmp:
+            elif mnemonic in ["jne", "b.ne"] and last_cmp:
                 c_lines.append(f"        if (!({last_cmp})) {{ // branch")            
-            elif insn.mnemonic in ["call", "bl", "blr"]:
-                c_lines.append(f"        sub_{insn.op_str.strip()}();")
-            elif insn.mnemonic in ["ret", "hlt"]:               
-                ret_val = "arg1" if (hasattr(self, 'arch_type') and self.arch_type == "aarch64") else "local_res"
-                c_lines.append(f"        return {ret_val};")
+            elif mnemonic in ["ret", "hlt"]:               
+                c_lines.append(f"        return {'arg1' if (hasattr(self, 'arch_type') and self.arch_type == 'aarch64') else 'local_res'};")
                 break
-                
+
         c_lines.append("    }")
         return "\n".join(c_lines)
 
@@ -234,7 +235,7 @@ class Runnow:
 
                 if cmd in ["q", "exit"]: 
                     break
-                elif cmd in ["h", "help", "?"]:
+                elif cmd in ["h", "help", "?"]:                   
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"  pd [lines]  : Disassembly view (Default: 15 lines) [Supports -o, -cut]\n"
                                  f"  px [bytes]  : Hex-Dump view (Default: 128 bytes) [Supports -o, -cut]\n"
@@ -244,10 +245,11 @@ class Runnow:
                                  f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C [Supports -o, -cut]\n"
                                  f"  s <offset>  : Seek cursor to target virtual address\n"
                                  f"  info        : Execute file signature evaluation & false positive filter [Supports -o, -cut]\n"
+                                 f"  ai          : Perform anti-tamper forensics & structure integrity scan [Supports -o, -cut]\n"
                                  f"  !<command>  : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help     : Show this commands list\n"
                                  f"  q, exit     : Close the program\n")                                                       
-                    self.check_and_print(help_text)                
+                    self.check_and_print(help_text)          
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
