@@ -67,5 +67,5 @@ class Shred:
         else:
             lines.append("    // Targeted offset reaches EOF. Decompilation aborted.")
 
-        lines.append(f"[{bold}INFO{reset}] Binary layers shredded successfully. All execution boundaries exposed.\n")
+        lines.append(f"[{bold}INFO{reset}] Binary layers shredded successfully.\n")
         return "\n".join(lines)
