@@ -241,7 +241,7 @@ class Runnow:
                                  f"  px [bytes]  : Hex-Dump view (Default: 128 bytes) [Supports -o, -cut]\n"
                                  f"  ax          : Scan external XREFs call references [Supports -o, -cut]\n"
                                  f"  ae          : Check file encryption using Shannon Entropy [Supports -o, -cut]\n"
-                                 f"  iz [filter] : Extract static ASCII strings from binary + Enterprise Auto-C [Supports -o, -cut]\n"
+                                 f"  iz [filter] : Extract static ASCII strings from binary + Auto-C [Supports -o, -cut]\n"
                                  f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C [Supports -o, -cut]\n"
                                  f"  s <offset>  : Seek cursor to target virtual address\n"
                                  f"  info        : Execute file signature evaluation & false positive filter [Supports -o, -cut]\n"
