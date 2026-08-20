@@ -37,15 +37,16 @@ class CapstoneDecompiler:
 
     def clean_operand(self, op_str):        
         clean = op_str.replace("qword ptr", "").replace("dword ptr", "")
-        clean = clean.replace("byte ptr", "").replace("word ptr", "").strip()                    
-        clean = clean.replace("[", "").replace("]", "").strip()
+        clean = clean.replace("byte ptr", "").replace("word ptr", "").strip()                   
+        clean = clean.replace("[", "").replace("]", "").strip()        
         
-        mathced = re.search(r'\(rbp|rsp|sp|x29)\s*([-+,#])\s*(0x[0-9a-fA-F]+|[0-9]+)', clean)
+        matched = re.search(r'\b(rbp|rsp|sp|x29)\b\s*([-+,#])\s*(0x[0-9a-fA-F]+|[0-9]+)', clean)
         if matched:
             return f"local_var_{match.group(3).replace('#', '')}h"            
+        
         for reg, var in self.reg_cleaner.items():
             clean = re.sub(rf'\b{reg}\b', var, clean)
-        return clean
+        return clean             
 
     def run_decompile(self):       
         active = False
