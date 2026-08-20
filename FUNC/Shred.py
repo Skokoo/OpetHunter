@@ -28,16 +28,10 @@ class Shred:
         yellow = getattr(self.shell, 'YELLOW', '\033[93m')
 
         lines = [
-            f"\n[{bold}INFO{reset}] Executing  binary shredding sequences.",
-            f"[{bold}INFO{reset}] Shredding 1: Triggering integrity forensics mapping pipelines.\n"
-        ]
+            f"\n[{bold}INFO{reset}] Executing  binary shredding sequences.\n",           
+        ]      
 
-        if "Integrity" in self.shell.modules:
-            lines.append(self.shell.modules["Integrity"](self.shell).run(args))
-        else:
-            lines.append(f"[{bold}WARNING{reset}] Integrity forensics modules bypassed.\n")
-
-        lines.append(f"[{bold}INFO{reset}] Shredding 2: Scanning global execution matrix and mapping functions.\n")
+        lines.append(f"[{bold}INFO{reset}] Shredding 1: Scanning global execution mapping functions.\n")
         
         points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
         points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
@@ -60,19 +54,6 @@ class Shred:
         branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) # Opcode b.eq, b.ne, jmp, cbz
         if branches_count > 0:
             lines.append(f"[INFO*] Control Flow Density  : Found {yellow}{bold}{branches_count}{reset} active branch conditions / block markers inside target.")
-
-        lines.append(f"[{bold}INFO{reset}] Shredding 3: Extracting underlying code structures directly to pseudo-C.\n")
-
-        actual_offset = target_vaddr - base
-        chunk_size = 64
-
-        if actual_offset + chunk_size <= size:
-            code_chunk = binary[actual_offset : actual_offset + chunk_size]
-            decompiler = CapstoneDecompiler(code_chunk, target_vaddr, binary)
-            pseudo_c = decompiler.run_decompile()
-            lines.append(pseudo_c if pseudo_c else "    // Empty decompiler execution stack.")
-        else:
-            lines.append("    // Targeted offset reaches EOF. Decompilation aborted.")
 
         lines.append(f"[{bold}INFO{reset}] Binary layers shredded successfully.\n")
         return "\n".join(lines)
