@@ -121,23 +121,16 @@ class Runnow:
         self.cs.detail = True               
         idx = self.binary_data.find(b"\x55\x48\x89\xE5")
         self.cursor = idx if idx != -1 else 0x0   
-       
+
     def auto_detect_entry_point(self):
-        pattern = b"\x55\x48\x89\xE5"
-        idx = self.binary_data.find(pattern)
-        self.cursor = idx if idx != -1 else 0x0
+        # Trik pencarian hibrida sekali tebas untuk epilog x86 dan penanda fungsi ARM64
+        idx = self.binary_data.find(b"\x55\x48\x89\xE5")
+        self.cursor = idx if idx != -1 else (self.binary_data.find(b"\xFF\x43\x00\xD1") if self.binary_data.find(b"\xFF\x43\x00\xD1") != -1 else 0x0)
 
     def calculate_entropy(self, data):
         if not data: return 0
-        entropy = 0
-        counts = [0] * 256
-        for byte in data:
-            counts[byte] += 1
-        for count in counts:
-            if count == 0: continue
-            p = count / len(data)
-            entropy -= p * math.log2(p)
-        return entropy
+        length = len(data)               
+        return -sum((count / length) * math.log2(count / length) for count in [data.count(byte) for byte in set(data)])
 
     def check_and_print(self, out_str):
         if out_str is None or not isinstance(out_str, str):
@@ -145,54 +138,36 @@ class Runnow:
             return
 
         lines = out_str.split("\n")
-        outfile = None
-        cut_val = None
+        argument = " ".join(self.last_args) if hasattr(self, 'last_args') and self.last_args else ""
         
-        if hasattr(self, 'last_args') and self.last_args:
-            arg_str = " ".join(self.last_args)
-                       
-            cut_match = re.search(r'-cut\s+(\d+)', arg_str)
-            if cut_match:
-                cut_val = int(cut_match.group(1))
-                lines = lines[:cut_val]
-                out_str = "\n".join(lines)
-            
-            out_match = re.search(r'-o\s+(\S+)', arg_str)
-            if out_match:
-                outfile = out_match.group(1)
+        cut_match = re.search(r'-cut\s+(\d+)', argument)
+        lines = lines[:int(cut_match.group(1))] if cut_match else lines
+        out_str = "\n".join(lines) if cut_match else out_str
+
+        out_match = re.search(r'-o\s+(\S+)', argument)
+        outfile = out_match.group(1) if out_match else None
+        
+        if outfile and os.path.exists(outfile):
+            print(f"[\033[1mWARNING\033[0m] File '{outfile}' \033[1malready exists.\033[0m")
+            choice = input("Overwrite? (y: Overwrite / n: Cancel / p: Print): ").strip().lower()
+            outfile = None if choice == 'p' else (outfile if choice == 'y' else "CANCEL")
+            if outfile == "CANCEL":
+                print("[\033[1mINFO\033[0m] Export canceled.")
+                return
         
         if outfile:
-            if os.path.exists(outfile):
-                print(f"[\033[1mWARNING\033[0m] File '{outfile}' \033[1malready exists.\033[0m")
-                confirm = input("Overwrite? (y: Overwrite / n: Cancel / p: Print): ").strip().lower()
-                
-                if confirm == 'p':
-                    print("\n[\033[1mINFO\033[0m] Redirecting output to screen layout.\n")
-                    outfile = None
-                elif confirm != 'y':
-                    print("[\033[1mINFO\033[0m] Export canceled.")
-                    return
-            
-            if outfile:
-                try:
-                    clean_text = re.sub(r'\033\[[0-9;]*m', '', out_str)
-                    with open(outfile, "w", encoding="utf-8") as f:
-                        f.write(clean_text)
-                    print(f"[\033[1mINFO\033[0m] Exported \033[1m{len(lines)}\033[0m lines to: {outfile}")
-                    return
-                except Exception as e:
-                    print(f"[\033[1mWARNING\033[0m] Failed to write file: \033[1m{e}\033[0m")
+            try:
+                with open(outfile, "w", encoding="utf-8") as stream:
+                    stream.write(re.sub(r'\033\[[0-9;]*m', '', out_str))
+                print(f"[\033[1mINFO\033[0m] Exported \033[1m{len(lines)}\033[0m lines to: {outfile}")
+                return
+            except Exception as failure:
+                print(f"[\033[1mWARNING\033[0m] Failed to write file: \033[1m{failure}\033[0m")
         
-        char_count = len(out_str)
-        lines_count = len(lines)
-        if char_count > 1500:
-            ask = input(f"Do you want to print \033[1m{char_count}\033[0m chars (\033[1m{lines_count}\033[0m lines)? (y/n)").strip().lower()
-            whitelist_print = tuple(("y"))
-            if ask not in whitelist_print:
-                print("[\033[1mWARNING\033[0m] Printing canceled.")
-                return            
+        if len(out_str) > 1500 and input(f"Do you want to print \033[1m{len(out_str)}\033[0m chars (\033[1m{len(lines)}\033[0m lines)? (y/n)").strip().lower() != 'y':
+            print("[\033[1mWARNING\033[0m] Printing canceled.")
+            return            
 
-                
         print(out_str)
 
     def translate_bytes_to_c(self, chunk, start_vaddr):
