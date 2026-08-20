@@ -54,8 +54,7 @@ if not os.path.exists(func_dir):
 else:
     import inspect
     import importlib           
-     
-    # This code in these file is NOT meant for humans. It is written for the processor.
+
     import_targets = [
         ("Disasm", "Disasm"),
         ("HexDump", "Hexdump"),
@@ -108,12 +107,12 @@ class Runnow:
         except Exception as e:
             print(f"[\033[1mWARNING*\033[0m] Error reading file: \033[1m{e}\033[0m")
             sys.exit(1)
-        
+
         self.arch_type = "x86_64"
         if self.file_size > 0x12:           
             if self.binary_data[0x12] == 0x28:
                 self.arch_type = "aarch64"
-       
+
         if self.arch_type == "aarch64":
             self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM) 
         else:
