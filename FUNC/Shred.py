@@ -1,23 +1,23 @@
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(current_dir)
-dec_path = os.path.join(root_dir, "DEC")
-
-if dec_path not in sys.path:
-    sys.path.insert(0, dec_path)
-
-try:
-    from CDec import CapstoneDecompiler
-except Exception:
-    print(f"[\033[1mERROR\033[0m] Import error: {e}")
-
 class Shred:
     def __init__(self, instance):
         self.shell = instance
 
     def run(self, args):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        root_dir = os.path.dirname(current_dir)
+        dec_path = os.path.join(root_dir, "DEC")
+
+        if dec_path not in sys.path:
+            sys.path.insert(0, dec_path)
+        
+        try:
+            from CDec import CapstoneDecompiler
+        except ImportError:
+            return f"[\033[1mERROR\033[0m] Importing error: {e}"
+ 
         binary = self.shell.binary_data
         base = self.shell.base_address
         size = self.shell.file_size
