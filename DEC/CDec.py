@@ -23,7 +23,7 @@ class CapstoneDecompiler:
         self.base_address = base             
         self.architecture = "arm" if len(complete) >= 20 and complete[18] == 0xb7 else "x86"
         
-        self.architecture = Cs(CS_ARCH_ARM64, CS_MODE_ARM) if self.architecture == "arm" else Cs(CS_ARCH_X86, CS_MODE_64)
+        self.cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM) if self.architecture == "arm" else Cs(CS_ARCH_X86, CS_MODE_64)
         self.cs.detail = True       
         self.reg_cleaner = {}
         try:
