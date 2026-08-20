@@ -35,23 +35,25 @@ class Integrity:
             f"  * Target File Size : {size} bytes"
         ]
 
+        # Offset 0x00 - 0x03: e_ident[0-3] (ELF Magic Number Validation)
         if len(binary) < 4 or list(binary[:4]) != [0x7f, 0x45, 0x4c, 0x46]:           
             return f"[\033[1mWARNING\033[0m] Command 'ai' is optimized for ELF/Native .so binaries. Format mismatched."
 
         lines.append(f"  * ELF Magic Status : {bold}Valid/ok (7f 45 4c 46){reset}")
 
-        # ELF Class: offset 4 (1=32bit, 2=64bit). Data encoding: offset 5 (1=LE, 2=BE)
+        # Offset 0x04: e_ident[EI_CLASS] (1=32bit, 2=64bit)
+        # Offset 0x05: e_ident[EI_DATA] (1=Little-Endian, 2=Big-Endian)
         bit_mode = "64-bit" if binary[4] == 2 else ("32-bit" if binary[4] == 1 else "Unknown Bits")
         endian_mode = "Little-Endian" if binary[5] == 1 else ("Big-Endian" if binary[5] == 2 else "Unknown Endian")
         lines.append(f"  * Class / Encoding : {bold}{bit_mode} / {endian_mode}{reset}")
 
-        # Offset 0x12 (18): Machine architecture (0x3e=x86_64, 0xb7=ARM64, 0x28=ARM32, 0x03=x86_32)
+        # Offset 0x12 (18): e_machine (Target Architecture Instruction Set)
         machine_code = binary[18]
         arch_map = {0x3e: "x86_64 (AMD64)", 0xb7: "AArch64 (ARM64)", 0x28: "ARM (32-bit)", 0x03: "Intel 80386 (x86)"}
         arch_name = arch_map.get(machine_code, f"Unknown (Code: {hex(machine_code)})")
         lines.append(f"  * Hardware Target  : {bold}{arch_name}{reset}")
 
-        # Offset 0x10 (16): ELF Type (1=Relocatable, 2=Executable, 3=Shared Object)
+        # Offset 0x10 (16): e_type (1=Relocatable, 2=Executable, 3=Shared Object)
         type_code = int.from_bytes(binary[16:18], "little")
         type_map = {1: "REL (Relocatable object file)", 2: "EXEC (Executable file)", 3: "DYN (Shared object / .so dynamic link library)"}
         type_name = type_map.get(type_code, f"Unknown Type ({type_code})")
@@ -75,7 +77,7 @@ class Integrity:
         has_rwx = b"mprotect" in flat_str or b"ptrace" in flat_str
         status_rwx = f"[{bold}WARNING{reset}] Contains dynamic injection or trace hooks primitives." if has_rwx else f"[{bold}INFO{reset}] No malicious hook signatures found"
         lines.append(f"  * Threat Indicators: {status_rwx}")
-      
+        
         has_upx = b"upx!" in flat_str
         status_upx = f"[{bold}WARNING{reset}] Packing layout signatures detected (UPX compression compressed)." if has_upx else f"[{bold}INFO{reset}] Native format templates layout unpacked"
         lines.append(f"  * Packer Signature : {status_upx}")
@@ -84,6 +86,5 @@ class Integrity:
         lines.append(f"  * Final verdict    : {verdict}\n")       
 
         return "\n".join(lines)
-
-            
-       
+         
+         
