@@ -12,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# The code in this file might still be sane,
-# but brace yourself for the others.
+#  The code in this file might still be sane,
+#  but brace yourself for the others.
 
 import sys
 import os
