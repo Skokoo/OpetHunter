@@ -18,10 +18,12 @@ import json
 from capstone import *
 
 class CapstoneDecompiler:
-    def __init__(self, binary, base):
+    def __init__(self, binary, base, complete):
         self.binary_data = binary
-        self.base_address = base
-        self.cs = Cs(CS_ARCH_X86, CS_MODE_64)
+        self.base_address = base             
+        self.architecture = "arm" if len(complete) >= 20 and complete[18] == 0xb7 else "x86"
+        
+        self.architecture = Cs(CS_ARCH_ARM64, CS_MODE_ARM) if self.architecture == "arm" else Cs(CS_ARCH_X86, CS_MODE_64)
         self.cs.detail = True       
         self.reg_cleaner = {}
         try:
@@ -35,28 +37,14 @@ class CapstoneDecompiler:
 
     def clean_operand(self, op_str):        
         clean = op_str.replace("qword ptr", "").replace("dword ptr", "")
-        clean = clean.replace("byte ptr", "").replace("word ptr", "").strip()       
-        match = re.search(r'\[(rbp|rsp)\s*([-+])\s*(0x[0-9a-fA-F]+|[0-9]+)\]', clean)
+        clean = clean.replace("byte ptr", "").replace("word ptr", "").strip()              
+        
+        match = re.search(r'\[(rbp|rsp|sp|x29)\s*([-+,#])\s*(0x[0-9a-fA-F]+|[0-9]+)\]', clean)
         if match:
-            return f"local_var_{match.group(3)}h"            
+            return f"local_var_{match.group(3).replace('#', '')}h"            
         for reg, var in self.reg_cleaner.items():
             clean = re.sub(rf'\b{reg}\b', var, clean)
         return clean
-
-    def resolve_inline_string(self, insn):        
-        try:            
-            if insn.mnemonic == "lea" and "rip" in insn.op_str:
-                match = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
-                if match:
-                    target = (insn.address + insn.size + int(match.group(), 16)) - self.base_address
-                    if 0 <= target < len(self.binary_data):                        
-                        chunk = self.binary_data[target : target + 32]
-                        regex = re.match(b"[\x20-\x7E]{4,}", chunk)
-                        if regex:
-                            return f'"{regex.group().decode("ascii", errors="ignore")}"'
-        except:
-            pass
-        return None 
 
     def run_decompile(self):       
         active = False
@@ -69,20 +57,22 @@ class CapstoneDecompiler:
         if not instructions:
             return "    // No valid execution to decompile."
         
-        loops = {int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) for ins in instructions if (ins.mnemonic == "jmp" or ins.mnemonic.startswith("j")) and (lambda t: t < ins.address)(int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) if ins.op_str.isdigit() else 0)}
+        loops = {int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) for ins in instructions if (ins.mnemonic in ["jmp", "b"] or ins.mnemonic.startswith("j")) and (lambda t: t < ins.address)(int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) if ins.op_str.isdigit() else 0)}
         
-        math_signs = {"add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>="}
-        comp_signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "jle": "<=", "jge": ">="}
-
-        # Dictionary based lambda call back.
-        # Bypasses CPU branch misprediction overhead caused by "if-elif" chains.
-        # This forces the Python interpreter to jump directly to the instruction handler 
-        # in constant "O(1)" time complexity, maximizing pseudo-C rendering frame rates.
+        math_signs = {
+            "add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>=",
+            "adds": "+=", "subs": "-=", "eor": "^=" 
+        }
+        comp_signs = {"je": "==", "jz": "==", "jne": "!=", "jnz": "!=", "jl": "<", "jg": ">", "cbz": "==", "cbnz": "!="}
+               
         handlers = {
-            "lea": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {res if res else f'&({ops[1]})'};",
-            "mov": lambda ops, ins, res, ind: f"{ind}{ops[0]} = {ops[1]};",
-            "xor": lambda ops, ins, res, ind: f"{ind}{ops[0]} = 0;" if ops[0] == ops[1] else f"{ind}{ops[0]} ^= {ops[1]};",
-            "call": lambda ops, ins, res, ind: f"{ind}sub_{','.join(ops)}();"
+            "lea": lambda ops, ins, ind: f"{ind}{ops[0]} = &({ops[1]});",
+            "mov": lambda ops, ins, ind: f"{ind}{ops[0]} = {ops[1]};" if len(ops) == 2 else f"{ind}{ops[0]} = {ops[1]};",
+            "ldr": lambda ops, ins, ind: f"{ind}{ops[0]} = {ops[1]};" if len(ops) == 2 else f"{ind}{ops[0]} = {ops[1]};", # ARM64 Load
+            "str": lambda ops, ins, ind: f"{ind}{ops[1]} = {ops[0]};" if len(ops) == 2 else f"{ind}{ops[1]} = {ops[0]};", # ARM64 Store (Terbalik)
+            "xor": lambda ops, ins, ind: f"{ind}{ops[0]} = 0;" if ops[0] == ops[1] else f"{ind}{ops[0]} ^= {ops[1]};",
+            "call": lambda ops, ins, ind: f"{ind}sub_{ops[0]}();",
+            "bl": lambda ops, ins, ind: f"{ind}sub_{ops[0]}();" # ARM64 Function Call
         }
 
         for index, insn in enumerate(instructions):                       
@@ -90,10 +80,12 @@ class CapstoneDecompiler:
                 lines.append(f"{indent}while (status_flag) {{ // Loop Recovery Triggered")
                 indent += "    "
 
-            if insn.mnemonic == "push" and "rbp" in insn.op_str:
+            mnemonic = insn.mnemonic
+            
+            if (mnemonic == "push" and "rbp" in insn.op_str) or (self.architecture == "arm" and index == 0):
                 active = True
-                lines.append(f"    // Function detected at {hex(insn.address)}\n    void function_{hex(insn.address)}() {{")
-                continue
+                lines.append(f"    // Function detected at {hex(insn.address)} ({'ARM64' if self.architecture == 'arm' else 'x86_64'})\n    void function_{hex(insn.address)}() {{")
+                if self.architecture == "arm": continue
 
             if not active and index == 0:
                 active = True                
@@ -101,14 +93,12 @@ class CapstoneDecompiler:
 
             clean = self.clean_operand(insn.op_str)
             ops = [part.strip() for part in clean.split(",")] if "," in clean else [clean]
-            resolved = self.resolve_inline_string(insn)
-            mnemonic = insn.mnemonic
-            
-            if mnemonic in handlers and len(ops) >= 2 if mnemonic != "call" else len(ops) >= 1:
-                lines.append(handlers[mnemonic](ops, insn, resolved, indent))
-            elif mnemonic in math_signs and len(ops) == 2:
+
+            if mnemonic in handlers and len(ops) >= 1:
+                lines.append(handlers[mnemonic](ops, insn, indent))
+            elif mnemonic in math_signs and len(ops) >= 2:
                 lines.append(f"{indent}{ops[0]} {math_signs[mnemonic]} {ops[1]};")
-            elif mnemonic.startswith("j") or mnemonic == "jmp":
+            elif mnemonic.startswith("j") or mnemonic in ["jmp", "b", "bl", "br", "blr", "cbz", "cbnz"]:
                 try:
                     target = int(insn.op_str, 16) if insn.op_str.startswith("0x") else int(insn.op_str)
                     if target < insn.address:
@@ -118,8 +108,10 @@ class CapstoneDecompiler:
                 except:
                     pass
 
-                if mnemonic == "jmp":
+                if mnemonic in ["jmp", "b"]:
                     lines.append(f"{indent}goto block_{clean};")
+                elif mnemonic in ["cbz", "cbnz"] and len(ops) == 2:                  
+                    lines.append(f"{indent}if ({ops[0]} {comp_signs[mnemonic]} 0) {{ goto block_{ops[1]}; }}")
                 else:
                     condition = "status_flag"
                     if index > 0 and instructions[index - 1].mnemonic == "cmp":
@@ -135,4 +127,3 @@ class CapstoneDecompiler:
             lines.append(f"{indent}return;\n    }}")                   
 
         return "\n".join(lines) if lines else "    // disassembly block."
-                        
