@@ -304,7 +304,7 @@ class Runnow:
                     if self.cursor + chunk_size <= self.file_size:
                         code_chunk = self.binary_data[self.cursor : self.cursor + chunk_size]
                         vaddr_start = self.base_address + self.cursor
-                        decompiler = CapstoneDecompiler(code_chunk, vaddr_start)
+                        decompiler = CapstoneDecompiler(code_chunk, vaddr_start, self.binary_data)
                         pseudo_c = decompiler.run_decompile()
 
                         if pseudo_c is not None:
