@@ -125,7 +125,6 @@ class Runnow:
         self.cursor = idx if idx != -1 else 0x0   
 
     def auto_detect_entry_point(self):
-        # Trik pencarian hibrida sekali tebas untuk epilog x86 dan penanda fungsi ARM64
         idx = self.binary_data.find(b"\x55\x48\x89\xE5")
         self.cursor = idx if idx != -1 else (self.binary_data.find(b"\xFF\x43\x00\xD1") if self.binary_data.find(b"\xFF\x43\x00\xD1") != -1 else 0x0)
 
