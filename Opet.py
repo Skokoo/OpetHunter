@@ -63,7 +63,8 @@ else:
         ("Strings", "StringsExtract"),
         ("Analyze", "Analyze"),
         ("Seeker", "Seeker"),
-        ("Integrity", "Integrity")
+        ("Integrity", "Integrity"),
+        ("Shred", "Shred")
     ]            
 
     for file_name, class_name in import_targets:
@@ -262,6 +263,10 @@ class Runnow:
                 elif cmd == "ai":
                     if "Integrity" in self.modules:
                         self.check_and_print(self.modules["Integrity"](self).run(args))
+                
+                elif cmd == "shred":
+                    if "Shred" in self.modules:
+                        self.check_and_print(self.modules["Shred"](self).run(args))
 
                 elif cmd == "iz":
                     if "StringsExtract" in self.modules:                      
