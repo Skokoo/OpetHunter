@@ -245,13 +245,14 @@ class Runnow:
                                  f"  ae          : Check file encryption using Shannon Entropy [Supports -o, -cut]\n"
                                  f"  iz [filter] : Extract static ASCII strings from binary + Auto-C [Supports -o, -cut]\n"
                                  f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C [Supports -o, -cut]\n"
+                                 f"  shred       : Force automated nearest function recovery and macro analysis execution [Supports -o, -cut]\n"
                                  f"  s <offset>  : Seek cursor to target virtual address\n"
                                  f"  info        : Execute file signature evaluation & false positive filter [Supports -o, -cut]\n"
                                  f"  ai          : Perform anti-tamper forensics & structure integrity scan [Supports -o, -cut]\n"
                                  f"  !<command>  : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help     : Show this commands list\n"
                                  f"  q, exit     : Close the program\n")                                                       
-                    self.check_and_print(help_text)            
+                    self.check_and_print(help_text)                                 
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
