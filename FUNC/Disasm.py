@@ -16,6 +16,7 @@ import os
 import sys
 import re
 import json
+from capstone import *
 
 class Disasm:
     def __init__(self, instance):
@@ -34,14 +35,14 @@ class Disasm:
 
         bold, reset, white = self.shell.BOLD, self.shell.RESET, self.shell.WHITE
         red, magenta, yellow, green = self.shell.RED, self.shell.MAGENTA, self.shell.YELLOW, self.shell.GREEN
-        
+
         points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
         points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
         all_funcs = sorted(list(set(points_x86 + points_arm)))
 
         if all_funcs and cursor < all_funcs[0]:
             return f"\n[\033[1mWARNING\033[0m] Address {hex(vaddr)} is inside ELF Header / Raw Meta Padding. Disassembly blocked.\n"
-        
+
         current_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.join(os.path.dirname(current_dir), "INFO", "reg_map.json")
         
@@ -49,10 +50,16 @@ class Disasm:
         if os.path.exists(json_path):
             try:
                 with open(json_path, "r") as stream:
-                    db = json.load(stream)                    
+                    db = json.load(stream)
                     reg_map = db.get(architecture, {})
             except:
                 pass
+
+        if architecture == "aarch64":
+            local_cs = Cs(CS_ARCH_ARM64, CS_MODE_ARM)
+        else:
+            local_cs = Cs(CS_ARCH_X86, CS_MODE_64)
+        local_cs.detail = True
 
         chunk = binary[cursor : cursor + (count * 4 if architecture == "aarch64" else count * 15)]
 
@@ -61,20 +68,20 @@ class Disasm:
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
         ]       
-        
-        pattern = r'\b(' + '|'.join(reg_map.keys()) + r')\b' if reg_map else r'\b(x\d+|w\d+|sp|rbp|rsp|rax|rdi)\b'
+
+        pattern = r'\b(' + '|'.join(reg_map.keys()) + r')\b' if reg_map else (r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr)\b' if architecture == "aarch64" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b')
 
         index = 0
-        for insn in self.shell.cs.disasm(chunk, vaddr):
+        for insn in local_cs.disasm(chunk, vaddr):
             if index >= count: 
                 break
 
             bytes_str = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
             operands = insn.op_str
-            
+
             if reg_map:
-                for reg, meta in reg_map.items():                    
-                    operands = re.sub(rf'\b{reg}\b', meta["clean_name"], operands)           
+                for reg, meta in reg_map.items():
+                    operands = re.sub(rf'\b{reg}\b', meta["clean_name"], operands)
             
             if reg_map:
                 clean_names_pattern = r'\b(' + '|'.join(meta["clean_name"] for meta in reg_map.values()) + r')\b'
