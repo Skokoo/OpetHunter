@@ -38,11 +38,11 @@ class Disasm:
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
         ]       
-        
+                      
         if architecture == "arm":
-            pattern = r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr|q\d+|v\d+|d\d+|s\d+)\b'
+            pattern = r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr)\b'
         else:
-            pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|al|bl|cl|dl|ah|bh|ch|dh)\b'
+            pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
 
         index = 0
         for insn in self.shell.cs.disasm(chunk, vaddr):
