@@ -239,20 +239,22 @@ class Runnow:
                     break
                 elif cmd in ["h", "help", "?"]:                   
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
-                                 f"  pd [lines]  : Disassembly view (Default: 15 lines) [Supports -o, -cut]\n"
-                                 f"  px [bytes]  : Hex-Dump view (Default: 128 bytes) [Supports -o, -cut]\n"
-                                 f"  ax          : Scan external XREFs call references [Supports -o, -cut]\n"
-                                 f"  ae          : Check file encryption using Shannon Entropy [Supports -o, -cut]\n"
-                                 f"  iz [filter] : Extract static ASCII strings from binary + Auto-C [Supports -o, -cut]\n"
-                                 f"  asmd [size] : Decompile assembly block at cursor to Pseudo-C [Supports -o, -cut]\n"
-                                 f"  shred       : Force automated nearest function recovery and macro analysis execution [Supports -o, -cut]\n"
-                                 f"  s <offset>  : Seek cursor to target virtual address\n"
-                                 f"  info        : Execute file signature evaluation & false positive filter [Supports -o, -cut]\n"
-                                 f"  ai          : Perform anti-tamper forensics & structure integrity scan [Supports -o, -cut]\n"
-                                 f"  !<command>  : Execute system shell command (e.g. !ls, !clear)\n"
-                                 f"  h, help     : Show this commands list\n"
-                                 f"  q, exit     : Close the program\n")                                                       
-                    self.check_and_print(help_text)                                 
+                                 f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
+                                 f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
+                                 f"  pd [lines]  : Stream native assembly instructions without buffer freeze\n"
+                                 f"  px [bytes]  : Display raw byte hex-dump configuration layouts\n"
+                                 f"  ax          : Trace branch cross-references and external function subroutines\n"
+                                 f"  ae          : Calculate Shannon Entropy for encryption detection\n"
+                                 f"  iz [filter] : Extract raw ASCII strings and force localized auto-C injection\n"
+                                 f"  asmd [size] : Transpile active block to pseudo-C via constant lambda maps\n"
+                                 f"  shred       : Run global function search and force instant pseudo-C extraction\n"
+                                 f"  s <offset>  : Seek address via log binary search with auto-suggest rules\n"
+                                 f"  info        : Scan external file signatures and compiler metadata leaks\n"
+                                 f"  ai          : Perform dynamic table mapping check for header tampering forensics\n"
+                                 f"  !<command>  : Pipe direct commands routing to the native Linux system shell\n"
+                                 f"  h, help     : Show this commands operational guide\n"
+                                 f"  q, exit     : Terminate runtime shell session and clear registers\n")                                                       
+                    self.check_and_print(help_text)                                                        
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
