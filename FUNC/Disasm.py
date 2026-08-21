@@ -12,7 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import os
+import sys
 import re
+import json
 
 class Disasm:
     def __init__(self, instance):
@@ -26,23 +29,40 @@ class Disasm:
 
         cursor = self.shell.cursor
         binary = self.shell.binary_data            
-        architecture = "arm" if len(binary) >= 20 and binary[18] == 0xb7 else "x86"     
-        chunk = binary[cursor : cursor + (count * 4 if architecture == "arm" else count * 15)]
+        architecture = "aarch64" if len(binary) >= 20 and binary[18] == 0xb7 else "x86_64"     
         vaddr = self.shell.base_address + cursor
 
         bold, reset, white = self.shell.BOLD, self.shell.RESET, self.shell.WHITE
         red, magenta, yellow, green = self.shell.RED, self.shell.MAGENTA, self.shell.YELLOW, self.shell.GREEN
+        
+        points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
+        points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
+        all_funcs = sorted(list(set(points_x86 + points_arm)))
+
+        if all_funcs and cursor < all_funcs[0]:
+            return f"\n[\033[1mWARNING\033[0m] Address {hex(vaddr)} is inside ELF Header / Raw Meta Padding. Disassembly blocked.\n"
+        
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        json_path = os.path.join(os.path.dirname(current_dir), "INFO", "reg_map.json")
+        
+        reg_map = {}
+        if os.path.exists(json_path):
+            try:
+                with open(json_path, "r") as stream:
+                    db = json.load(stream)                    
+                    reg_map = db.get(architecture, {})
+            except:
+                pass
+
+        chunk = binary[cursor : cursor + (count * 4 if architecture == "aarch64" else count * 15)]
 
         lines = [
-            f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'arm' else 'x86_64'})", 
+            f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'aarch64' else 'x86_64'})", 
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
         ]       
-                      
-        if architecture == "arm":
-            pattern = r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr)\b'
-        else:
-            pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
+        
+        pattern = r'\b(' + '|'.join(reg_map.keys()) + r')\b' if reg_map else r'\b(x\d+|w\d+|sp|rbp|rsp|rax|rdi)\b'
 
         index = 0
         for insn in self.shell.cs.disasm(chunk, vaddr):
@@ -51,17 +71,26 @@ class Disasm:
 
             bytes_str = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
             operands = insn.op_str
+            
+            if reg_map:
+                for reg, meta in reg_map.items():                    
+                    operands = re.sub(rf'\b{reg}\b', meta["clean_name"], operands)           
+            
+            if reg_map:
+                clean_names_pattern = r'\b(' + '|'.join(meta["clean_name"] for meta in reg_map.values()) + r')\b'
+                operands = re.sub(clean_names_pattern, f"{bold}\\1{reset}", operands)
+            else:
+                operands = re.sub(pattern, f"{bold}\\1{reset}", operands)
 
-            operands = re.sub(pattern, f"{bold}\\1{reset}", operands)
             operands = re.sub(r'(0x[0-9a-fA-F]+)', f"{bold}\\1{reset}", operands)
 
             mnemonic = insn.mnemonic
             flow = f"{white}│{reset}"
 
-            if mnemonic.startswith('j') or (architecture == "arm" and mnemonic in ['b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
+            if mnemonic.startswith('j') or (architecture == "aarch64" and mnemonic in ['b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
                 mnemonic = f"{red}{bold}{mnemonic}{reset}"
                 flow = f"{bold}├── [JMP]{reset}"
-            elif mnemonic == 'call' or (architecture == "arm" and mnemonic == 'bl'):
+            elif mnemonic == 'call' or (architecture == "aarch64" and mnemonic == 'bl'):
                 mnemonic = f"{magenta}{bold}{mnemonic}{reset}"
                 flow = f"{magenta}├── [CALL]{reset}"
             elif mnemonic in ['ret', 'hlt']:
@@ -75,5 +104,3 @@ class Disasm:
 
         lines.append("-" * 85 + "\n")
         return "\n".join(lines)
-
-        
