@@ -62,7 +62,7 @@ class Shred:
             lines.append(f"[INFO*] Smart-Target Lock     : No distinct signatures found. Falling back to cursor.")
 
         lines.append(f"[INFO*] Localized address cursor : {hex(base + self.shell.cursor)}")
-        lines.append(f"[INFO*] Shredder targeted code   : {cyan}{hex(target_vaddr)}{reset}\n")      
+        lines.append(f"[INFO*] Shredder targeted code   : {cyan}{hex(target_vaddr)}{reset}")      
 
         target_chunk = binary[target_vaddr - base : (target_vaddr - base) + 64]
         branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) 
