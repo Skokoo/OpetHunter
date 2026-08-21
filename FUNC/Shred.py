@@ -26,7 +26,7 @@ class Shred:
 
         if dec_path not in sys.path:
             sys.path.insert(0, dec_path)
-        
+
         try:
             from CDec import CapstoneDecompiler
         except ImportError as wow:
@@ -46,7 +46,7 @@ class Shred:
         ]      
 
         lines.append(f"[{bold}INFO{reset}] Shredding 1: Scanning global execution mapping functions.\n")
-        
+
         points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
         points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
         all_funcs = sorted(list(set(points_x86 + points_arm)))
@@ -63,11 +63,26 @@ class Shred:
 
         lines.append(f"[INFO*] Localized address cursor : {hex(base + self.shell.cursor)}")
         lines.append(f"[INFO*] Shredder targeted code   : {cyan}{hex(target_vaddr)}{reset}\n")      
-        
+
         target_chunk = binary[target_vaddr - base : (target_vaddr - base) + 64]
-        branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) # Opcode b.eq, b.ne, jmp, cbz
+        branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) 
         if branches_count > 0:
             lines.append(f"[INFO*] Control Flow Density  : Found {yellow}{bold}{branches_count}{reset} active branch conditions / block markers inside target.")
 
-        lines.append(f"[{bold}INFO{reset}] Binary layers shredded successfully.\n")
+        
+        lines.append(f"\n[{bold}INFO{reset}] Shredding 2: Extracting underlying code structures directly to pseudo-C.\n")
+
+        actual_offset = target_vaddr - base
+        chunk_size = 64
+
+        if actual_offset + chunk_size <= size:
+            code_chunk = binary[actual_offset : actual_offset + chunk_size]
+            decompiler = CapstoneDecompiler(code_chunk, target_vaddr, binary)
+            pseudo_c = decompiler.run_decompile()
+            lines.append(pseudo_c if pseudo_c else "    // Empty decompiler execution stack.")
+        else:
+            lines.append("    // Targeted offset reaches EOF. Decompilation aborted.")
+
+        lines.append(f"\n[{bold}INFO{reset}] Binary layers shredded successfully.\n")
         return "\n".join(lines)
+            
