@@ -111,6 +111,10 @@ class Runnow:
             print(f"[\033[1mWARNING*\033[0m] Error reading file: \033[1m{e}\033[0m")
             sys.exit(1)
 
+        if self.file_size > 4 and self.binary_data[4] != 2:
+            print("[\033[1mERROR\033[0m] Unsupported architecture. Architecture rules enforce 64-bit modern binary layers only.")
+            sys.exit(1)
+
         self.arch_type = "x86_64"
         if self.file_size > 0x12:           
             if self.binary_data[0x12] == 0x28:
