@@ -23,13 +23,13 @@ class Disasm:
         if args and isinstance(args, list) and len(args) > 0:
             try: count = int(args[0])
             except: pass
-     
+
         cursor = self.shell.cursor
         binary = self.shell.binary_data            
         architecture = "arm" if len(binary) >= 20 and binary[18] == 0xb7 else "x86"     
         chunk = binary[cursor : cursor + (count * 4 if architecture == "arm" else count * 15)]
         vaddr = self.shell.base_address + cursor
-        
+
         bold, reset, white = self.shell.BOLD, self.shell.RESET, self.shell.WHITE
         red, magenta, yellow, green = self.shell.RED, self.shell.MAGENTA, self.shell.YELLOW, self.shell.GREEN
 
@@ -38,23 +38,26 @@ class Disasm:
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
         ]       
-
-        pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|x\d+|w\d+|sp|wsp|pc|lr)\b' if architecture == "arm" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b'
         
+        if architecture == "arm":
+            pattern = r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr|q\d+|v\d+|d\d+|s\d+)\b'
+        else:
+            pattern = r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+|al|bl|cl|dl|ah|bh|ch|dh)\b'
+
         index = 0
         for insn in self.shell.cs.disasm(chunk, vaddr):
             if index >= count: 
                 break
-            
+
             bytes_str = "".join(f"{b:02x}" for b in insn.bytes).ljust(18)
             operands = insn.op_str
-                       
+
             operands = re.sub(pattern, f"{bold}\\1{reset}", operands)
             operands = re.sub(r'(0x[0-9a-fA-F]+)', f"{bold}\\1{reset}", operands)
 
             mnemonic = insn.mnemonic
             flow = f"{white}│{reset}"
-            
+
             if mnemonic.startswith('j') or (architecture == "arm" and mnemonic in ['b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
                 mnemonic = f"{red}{bold}{mnemonic}{reset}"
                 flow = f"{bold}├── [JMP]{reset}"
@@ -64,7 +67,7 @@ class Disasm:
             elif mnemonic in ['ret', 'hlt']:
                 mnemonic = f"{yellow}{bold}{mnemonic}{reset}"
                 flow = f"{yellow}└── [END]{reset}"
-            elif mnemonic in ['xor', 'sub', 'add', 'cmp', 'eor', 'subs', 'adds']:
+            elif mnemonic in ['xor', 'sub', 'add', 'cmp', 'eor', 'subs', 'adds', 'and', 'ands', 'orr', 'eon']:
                 mnemonic = f"{green}{mnemonic}{reset}"
 
             lines.append(f"  {white}{hex(insn.address)}{reset}\t{bytes_str}\t{flow}\t{mnemonic} {operands}")
@@ -72,3 +75,5 @@ class Disasm:
 
         lines.append("-" * 85 + "\n")
         return "\n".join(lines)
+
+        
