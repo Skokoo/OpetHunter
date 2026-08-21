@@ -241,19 +241,19 @@ class Runnow:
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
                                  f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
-                                 f"  pd [lines]  : {BOLD}Stream native assembly instructions without buffer freeze{RESET}\n"
-                                 f"  px [bytes]  : {BOLD}Display raw byte hex-dump configuration layouts{RESET}\n"
-                                 f"  ax          : {BOLD}Trace branch cross-references and external function subroutines{RESET}\n"
-                                 f"  ae          : {BOLD}Calculate Shannon Entropy for encryption detection{RESET}\n"
-                                 f"  iz [filter] : {BOLD}Extract raw ASCII strings and force localized auto-C injection{RESET}\n"
-                                 f"  asmd [size] : {BOLD}Transpile active block to pseudo-C using constant lambda maps{RESET}\n"
-                                 f"  shred       : {BOLD}Run global function search and force instant pseudo-C extraction{RESET}\n"
-                                 f"  s <offset>  : {BOLD}Seek address via log binary search with auto-suggest rules{RESET}\n"
-                                 f"  info        : {BOLD}Scan external file signatures and compiler metadata leaks{RESET}\n"
-                                 f"  ai          : {BOLD}Perform dynamic table mapping check for header tampering forensics{RESET}\n"
-                                 f"  !<command>  : {BOLD}Pipe direct commands routing to the native Linux system shell{RESET}\n"
-                                 f"  h, help     : {BOLD}Show this commands operational guide{RESET}\n"
-                                 f"  q, exit     : {BOLD}Terminate runtime shell session and clear registers{RESET}\n")                                                       
+                                 f"  pd [lines]  : Stream native assembly instructions without buffer freeze\n"
+                                 f"  px [bytes]  : Display raw byte hex-dump configuration layouts\n"
+                                 f"  {BOLD}{BOLD}ax{RESET}          : Trace branch cross-references and external function subroutines\n"
+                                 f"  {BOLD}ae{RESET}          : Calculate Shannon Entropy for encryption detection\n"
+                                 f"  {BOLD}iz{RESET} [filter] : Extract raw ASCII strings and force localized auto-C injection\n"
+                                 f"  {BOLD}asmd{RESET} [size] : Transpile active block to pseudo-C using constant lambda maps\n"
+                                 f"  {BOLD}shred{RESET}       : Run global function search and force instant pseudo-C extraction\n"
+                                 f"  {BOLD}s{RESET} <offset>  : Seek address via log binary search with auto-suggest rules\n"
+                                 f"  {BOLD}info{RESET}        : Scan external file signatures and compiler metadata leaks\n"
+                                 f"  {BOLD}ai{RESET}          : Perform dynamic table mapping check for header tampering forensics\n"
+                                 f"  {BOLD}!{RESET}<command>  : Pipe direct commands routing to the native Linux system shell\n"
+                                 f"  {BOLD}h, help{RESET}     : Show this commands operational guide\n"
+                                 f"  q, {BOLD}exit{RESET}     : Terminate runtime shell session and clear registers\n")                                                       
                     self.check_and_print(help_text)                                                        
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
