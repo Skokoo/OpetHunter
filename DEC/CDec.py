@@ -59,7 +59,7 @@ class CapstoneDecompiler:
         if not instructions:
             return "    // No valid execution to decompile."
         
-        loops = {int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) for ins in instructions if (ins.mnemonic in ["jmp", "b"] or ins.mnemonic.startswith("j")) and (lambda t: t < ins.address)(int(ins.op_str, 16) if ins.op_str.startswith("0x") else int(ins.op_str) if ins.op_str.isdigit() else 0)}
+        loops = {int(ins.op_str.strip("#"), 16) if ins.op_str.strip("#").startswith("0x") else int(ins.op_str.strip("#")) for ins in instructions if (ins.mnemonic in ["jmp", "b"] or ins.mnemonic.startswith("j")) and (lambda t: t < ins.address)(int(ins.op_str.strip("#"), 16) if ins.op_str.strip("#").startswith("0x") else int(ins.op_str.strip("#")) if ins.op_str.strip("#").isdigit() else 0)}
         
         math_signs = {
             "add": "+=", "sub": "-=", "imul": "*=", "and": "&=", "or": "|=", "shl": "<<=", "shr": ">>=",
