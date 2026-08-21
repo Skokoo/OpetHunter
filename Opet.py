@@ -251,7 +251,7 @@ class Runnow:
                                  f"  !<command>  : Execute system shell command (e.g. !ls, !clear)\n"
                                  f"  h, help     : Show this commands list\n"
                                  f"  q, exit     : Close the program\n")                                                       
-                    self.check_and_print(help_text)          
+                    self.check_and_print(help_text)            
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
