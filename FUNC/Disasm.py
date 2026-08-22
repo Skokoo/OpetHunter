@@ -36,12 +36,8 @@ class Disasm:
         bold, reset, white = self.shell.BOLD, self.shell.RESET, self.shell.WHITE
         red, magenta, yellow, green = self.shell.RED, self.shell.MAGENTA, self.shell.YELLOW, self.shell.GREEN
 
-        points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
-        points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
-        all_funcs = sorted(list(set(points_x86 + points_arm)))
-
-        if all_funcs and cursor < all_funcs[0]:
-            return f"\n[\033[1mWARNING\033[0m] Address {hex(vaddr)} is inside ELF Header / Raw Meta Padding. Disassembly blocked.\n"
+        if cursor < 0x40:
+            return f"\n[\033[1mWARNING\033[0m] Address {hex(vaddr)} is inside ELF Header Identity Layout. Disassembly blocked.\n"
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.join(os.path.dirname(current_dir), "INFO", "reg_map.json")
