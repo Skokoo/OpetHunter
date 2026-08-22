@@ -224,10 +224,11 @@ class Runnow:
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
         valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
+        archi = f"{CYAN}[AArch64]{RESET}" if self.shell.is_arm64 else f"{MAGENTA}[x86_64]{RESET}"
 
         while True:
             try:
-                prompt = f"{BOLD}opet@{hex(self.cursor)}>{RESET} "
+                prompt = f"{archi} {BOLD}opet@{hex(self.cursor)}>{RESET} "
                 raw_input = input(prompt).strip()
                 if not raw_input: continue
 
