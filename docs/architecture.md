@@ -10,8 +10,8 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 ## 1. Granular Component Specification
 
 ### A. FUNC/analyze.py (1.8388 ms & 11.9777 ms)
-* **Role:** Engine backend for the `info` command subsystem.
-* **Logic:** Extracts primary file size metrics, fingerprints compiler variants, maps binary linking topologies, and resolves minimum target system dependencies (e.g., `GLIBC` symbols). 
+* **Role:** Engine backend for the `ax` & 'ae' command subsystem.
+* **Logic:** 
 
 Output Example:
 
