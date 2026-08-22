@@ -1,11 +1,16 @@
-# OpetHunter Code of Conduct
+# Code of Conduct
 
 ## 1. My Pledge
-Please keep this project a safe, respectful, and chill space for anyone who genuinely loves low-level binary engineering and talking directly to the machine. 
+I am committed to providing a safe, respectful, and collaborative environment for everyone passionate about low-level binary engineering and assembly-level architecture.
 
 ## 2. Expected Behavior
-* **Be Cool:** Share knowledge about ARM64/x86_64, give constructive code feedback, and respect other engineering viewpoints.
-* **Don't be a talkative bad guy:** Trolling, personal insults, political attacks, or leaking anyone's private details is NOT allowed.
-* **Keep It Tech-Focused:** This is a pocket decompiler project, not a social media playground.
+* **Professional Collaboration:** Share knowledge on ARM64/x86_64, provide constructive code reviews, and respect diverse technical perspectives.
+* **Prohibited Conduct:** Harassment, personal insults, political disputes, and the unauthorized disclosure of private information (doxxing) are strictly forbidden.
+* **Technical Focus:** Maintain discussions centered around the development of this pocket decompiler project. Non-technical or unrelated social debates should be avoided.
 
-I hope you guys can understand what I am talking about. Keep behaving well to fellow humans!
+## 3. Enforcement and Consequences
+* **Reporting Incidents:** If you witness or experience unacceptable behavior, please report it directly to me as the project maintainer.
+* **Corrective Actions:** Violations of this Code of Conduct may result in a temporary warning, repository bans, or permanent exclusion from the project.
+* **Maintainer Responsibility:** I retain the right to moderate, edit, or delete any comments, issues, or pull requests that do not align with these standards.
+
+I appreciate your cooperation in maintaining a professional and welcoming community for this project.
