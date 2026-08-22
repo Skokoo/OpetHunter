@@ -26,26 +26,57 @@ class Seeker:
         binary = self.shell.binary_data
         base = self.shell.base_address
         size = self.shell.file_size
-        
-        target = str(args[0]).strip()
-        try:
-            val = int(target, 16) if target.startswith("0x") else int(target)
-        except ValueError:
-            return "\n[\033[1mWARNING\033[0m] Invalid address format.\n"
-        
-        if not (0 <= (val - base) <= size):
-            return "\n[\033[1mWARNING\033[0m] Address out of bounds.\n"
-        
-        points = [base + idx for idx, byte in enumerate(binary) if byte in (0x55, 0xc3)]        
-        
-        index = bisect.bisect_left(points, val)
-        suggest = points[min(len(points) - 1, max(0, index if index < len(points) and points[index] == val else index - 1))] if points else base
-        
-        self.shell.cursor = val - base
+        arch = getattr(self.shell, 'arch_type', 'x86_64')
 
         bold = getattr(self.shell, 'BOLD', '\033[1m')
         reset = getattr(self.shell, 'RESET', '\033[0m')
         yellow = getattr(self.shell, 'YELLOW', '\033[93m')
         cyan = getattr(self.shell, 'CYAN', '\033[96m')
 
-        return f"Cursor synchronized to: {hex(val)}" if val == suggest else f"\nCursor synchronized to: {hex(val)} {yellow}{bold}[WARNING: Inside Data/Padding]{reset}\n-> {bold}Nearest valid function entry point found at: {hex(suggest)}{reset}\n"
+        if not args:
+            return f"\n[{bold}WARNING{reset}] Missing address target.\n"
+
+        target = str(args[0]).strip()
+        try:
+            val = int(target, 16) if target.startswith("0x") else int(target)
+        except ValueError:
+            return f"\n[{bold}WARNING{reset}] Invalid address format.\n"
+
+        if not (0 <= (val - base) <= size):
+            return f"\n[{bold}WARNING{reset}] Address out of bounds.\n"
+
+        points = []       
+        if arch == "aarch64":            
+            idx = binary.find(b"\xff\x43\x00\xd1")
+            while idx != -1:
+                points.append(base + idx)
+                idx = binary.find(b"\xff\x43\x00\xd1", idx + 1)
+                            
+            idx = binary.find(b"\xfd\x7b\xbf\xa9")
+            while idx != -1:
+                points.append(base + idx)
+                idx = binary.find(b"\xfd\x7b\xbf\xa9", idx + 1)
+        else:           
+            idx = binary.find(b"\x55\x48\x89\xe5")
+            while idx != -1:
+                points.append(base + idx)
+                idx = binary.find(b"\x55\x48\x89\xe5", idx + 1)
+      
+        points.sort()
+        self.shell.cursor = val - base
+
+        if not points:
+            return f"Cursor synchronized to: {hex(val)}"
+
+        index = bisect.bisect_left(points, val)
+        
+        if index < len(points) and points[index] == val:
+            suggest = points[index]
+        else:
+            suggest = points[max(0, index - 1)]
+
+        if val == suggest:
+            return f"Cursor synchronized to: {hex(val)}"
+            
+        return (f"\nCursor synchronized to: {hex(val)} {yellow}{bold}[WARNING: Inside Data/Padding]{reset}\n"
+                f"-> {bold}Nearest valid function entry point found at: {cyan}{hex(suggest)}{reset}\n")
