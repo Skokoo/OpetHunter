@@ -243,7 +243,8 @@ class Runnow:
                 if user_typed not in valid_cmds:
                     matches = [c for c in valid_cmds if c.startswith(user_typed)]
                     if len(matches) == 1:
-                        cmd = matches[0]  
+                        print(f"[\033[1mWARNING\033[0m] Command not found. Did you mean: \033[1m{matches[0]}\033[0m?")
+                        continue                 
                         
                 if cmd in ["q", "exit"]: 
                     break
