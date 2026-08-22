@@ -14,15 +14,20 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 * **Logic:** Extracts primary file size metrics, fingerprints compiler variants, maps binary linking topologies, and resolves minimum target system dependencies (e.g., `GLIBC` symbols). 
 
 ```
-============================================================
- [INFO] METADATA ============================================================                              * Size   : 44571 bytes
-                       * Format : ELF (Linux)                       
-* Arch   : x86_64
-                            * Lang   : C / C++ or Native ASM             
-* Comp   : GCC (GNU Compiler Collection)
-     * Target : Linux Kernel (Requires GLIBC_2.2)
+========================================================================
+ [INFO] METADATA
+========================================================================
+ * Size   : 44571 bytes
+ * Format : ELF (Linux)
+ * Arch   : x86_64
+ * Lang   : C / C++ or Native ASM
+ * Comp   : GCC (GNU Compiler Collection)
+ * Target : Linux Kernel (Requires GLIBC_2.2)
+ * Linker : GNU ld (Standard Linux)
 
-  * Linker : GNU ld (Standard Linux)    [INFO] Alerts/Protections: None (Clean ASM) ============================================================
+ [INFO] ALERTS & PROTECTIONS
+ * Status : None (Clean ASM / No Packer Detected)
+========================================================================
 ```                                                                                             
 ### B. FUNC/disasm.py
 * **Role:** Engine backend for the `asmd` command blocks.
