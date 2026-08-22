@@ -125,8 +125,9 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 * **Role:** Engine backend for the `iz` command.
 * **Logic:** Scans specific binary segments to extract printable ASCII string tokens. Triggers automated localized decompiler heuristic injections adjacent to sensitive extracted symbols to provide context-aware binary clues.
 
+Output Example:
+
 ```
-```text
 0xa971        0x1000a971      -> bwght.1569
     // Auto-Decompile Code Block at 0x1000a97b
     {
