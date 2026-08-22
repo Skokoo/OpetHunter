@@ -249,24 +249,25 @@ class Runnow:
                         
                 if cmd in ["q", "exit"]: 
                     break
-                elif cmd in ["help", "?"]:                   
+                elif cmd in ["help", "?"]:  
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
                                  f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
-                                 f"  {BOLD}pd{RESET} [lines]  : Stream native assembly instructions without buffer freeze\n"
-                                 f"  {BOLD}px{RESET} [bytes]  : Display raw byte hex-dump configuration layouts\n"
-                                 f"  {BOLD}{BOLD}ax{RESET}          : Trace branch cross-references and external function subroutines\n"
-                                 f"  {BOLD}ae{RESET}          : Calculate Shannon Entropy for encryption detection\n"
-                                 f"  {BOLD}iz{RESET} [filter] : Extract raw ASCII strings and force localized auto-C injection\n"
-                                 f"  {BOLD}asmd{RESET} [size] : Transpile active block to pseudo-C using constant lambda maps\n"
-                                 f"  {BOLD}shred{RESET}       : Run global function search and force instant pseudo-C extraction\n"
-                                 f"  {BOLD}s{RESET} <offset>  : Seek address via log binary search with auto-suggest rules\n"
-                                 f"  {BOLD}info{RESET}        : Scan external file signatures and compiler metadata leaks\n"
-                                 f"  {BOLD}ai{RESET}          : Perform dynamic table mapping check for header tampering forensics\n"
-                                 f"  {BOLD}!{RESET}<command>  : Pipe direct commands routing to the native Linux system shell\n"
-                                 f"  {BOLD}?, help{RESET}     : Show this commands operational guide\n"
-                                 f"  q, {BOLD}exit{RESET}     : Terminate runtime shell session and clear registers\n")                                                       
-                    self.check_and_print(help_text)                                                        
+                                 f"  {BOLD}pd{RESET} [lines]  : Stream native AArch64/x86_64 disassembly without buffer freeze\n"
+                                 f"  {BOLD}px{RESET} [bytes]  : Display raw byte hex-dump configurations and alignment layouts\n"
+                                 f"  {BOLD}ax{RESET}          : Trace dynamic branch cross-references and relative RIP/PC vectors\n"
+                                 f"  {BOLD}ae{RESET}          : Compute Shannon Entropy mathematical mapping for packer detection\n"
+                                 f"  {BOLD}iz{RESET} [filter] : Extract raw ASCII strings with live localized Auto-C injection\n"
+                                 f"  {BOLD}asmd{RESET} [size] : Transpile active block to static C code via constant lambda maps\n"
+                                 f"  {BOLD}shred{RESET}       : Run global signature scanner and force instant Pseudo-C extraction\n"
+                                 f"  {BOLD}s{RESET} <offset>  : Seek address via log binary search with anti-trap suggestions\n"
+                                 f"  {BOLD}info{RESET}        : Scan low-level file signatures and compiler metadata leaks\n"
+                                 f"  {BOLD}ai{RESET}          : Validate section headers for anti-analysis tampering forensics\n"
+                                 f"  {BOLD}!{RESET}<command>  : Pipe direct command execution routing to the native Linux shell\n"
+                                 f"  {BOLD}?, help{RESET}     : Show this advanced tactical operational command guide\n"
+                                 f"  q, {BOLD}exit{RESET}     : Terminate active runtime shell session and purge volatile registers\n")                                                       
+                    self.check_and_print(help_text)                 
+                                                                       
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
