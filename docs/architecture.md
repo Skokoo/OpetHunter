@@ -1,7 +1,8 @@
 # Architecture
 An ultra-optimized, zero-bloat 64-bit cross-OS binary analysis engine strictly bounded under a 27MB RAM constraint.
 
-## FUNC/The code within this directory might be complex, but it pays off completely because the execution speed becomes fast.
+## FUNC/
+The code within this directory might be complex, but it pays off completely because the execution speed becomes fast.
 
 ## 1. Granular File & Specifications
 
