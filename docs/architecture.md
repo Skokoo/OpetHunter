@@ -10,7 +10,7 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 ## 1. Granular Component Specification
 
 ### A. FUNC/analyze.py (1.8388 ms & 11.9777 ms)
-* **Role:** Engine backend for the `ax` & 'ae' command subsystem.
+* **Role:** Engine backend for the `ax` & `ae` command subsystem.
 * **Logic1/ax:** Sweeps raw opcode boundaries to resolve branch displacements. Compatible with AArch64 relative branches and x86 RIP-relative structures.
 * **Logic2/ae:** Calculates algorithmic high-density randomness statistics directly on byte arrays. If the entropy metrics hit 7.99, the target binary layer is packed tighter. 
 
