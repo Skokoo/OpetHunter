@@ -125,6 +125,40 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 * **Role:** Engine backend for the `iz` command.
 * **Logic:** Scans specific binary segments to extract printable ASCII string tokens. Triggers automated localized decompiler heuristic injections adjacent to sensitive extracted symbols to provide context-aware binary clues.
 
+```
+```text
+0xa971        0x1000a971      -> bwght.1569
+    // Auto-Decompile Code Block at 0x1000a97b
+    {
+        byte ptr [arg3 + 0x6c] += ah;
+        dword ptr cs:[rip + 0x62003436] ^= esi;
+        dword ptr cs:[rip + 0x73003736] ^= esi;                                                               }
+  0xa988        0x1000a988      -> bnchx.1567
+    // Auto-Decompile Code Block at 0x1000a992
+    {
+        byte ptr [rbx + 0x61] += dh;
+        dword ptr cs:[arg2] ^= esi;                                                                                                                                                                                                  
+        edi ^= dword ptr [arg4];
+        byte ptr [arg1 + 0x6e] += dh;
+        dword ptr cs:[arg2] ^= esi;                                                                               eax ^= 0x71650030;
+        if (!(dword ptr [local_res] ==  eax)) { // branch
+        byte ptr [arg2] ^= ch;
+        dword ptr [rip + 0x69003833] ^= esi;
+        byte ptr [arg3 + 0x6f] += ch;                                                                             dword ptr [arg2] ^= esi;
+        dword ptr [arg1] ^= esi;
+    }
+  0xa99b        0x1000a99b      -> wneigh.1669
+    // Auto-Decompile Code Block at 0x1000a9a6
+    {                                                    byte ptr [rbx + 0x70] += dh;
+        dword ptr cs:[arg2] ^= esi;
+        eax ^= 0x71650030;
+        byte ptr [arg2] ^= ch;
+        dword ptr [rip + 0x69003833] ^= esi;
+        byte ptr [arg3 + 0x6f] += ch;                                                                             dword ptr [arg2] ^= esi;
+        dword ptr [arg1] ^= esi;
+        byte ptr [arg4 + 0x64] += ch;
+    }
+```
 ---
 
 ## 2. Memory Preservation & Instance Isolation
