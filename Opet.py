@@ -221,6 +221,8 @@ class Runnow:
         return "\n".join(c_lines)
 
     def run_shell(self):
+        import time  # Pastikan module time diimpor
+        
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
         valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'info', 'ai', 'help', 'exit']      
@@ -247,10 +249,17 @@ class Runnow:
                         formatted_matches = ", ".join(f"'\033[1m{m}\033[0m'" for m in matches)
                         print(f"[\033[1mWARNING\033[0m] Command not found. Did you mean: {formatted_matches}?")
                         continue                                          
-                        
+
                 if cmd in ["q", "exit"]: 
                     break
-                elif cmd in ["help", "?"]:  
+                
+                # --- START BENCHMARK TIMER ---
+                # Mengukur waktu hanya untuk komando operasional analisis
+                is_operational = cmd not in ["help", "?"]
+                if is_operational:
+                    start_time = time.perf_counter()
+
+                if cmd in ["help", "?"]:  
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
                                  f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
@@ -268,7 +277,7 @@ class Runnow:
                                  f"  {BOLD}?, help{RESET}     : Show this advanced tactical operational command guide\n"
                                  f"  q, {BOLD}exit{RESET}     : Terminate active runtime shell session and purge volatile registers\n")                                                       
                     self.check_and_print(help_text)                 
-                                                                       
+
                 elif cmd == "pd":
                     if "Disasm" in self.modules:
                         self.check_and_print(self.modules["Disasm"](self).run(args))
@@ -280,7 +289,7 @@ class Runnow:
                 elif cmd == "ai":
                     if "Integrity" in self.modules:
                         self.check_and_print(self.modules["Integrity"](self).run(args))
-                
+
                 elif cmd == "shred":
                     if "Shred" in self.modules:
                         self.check_and_print(self.modules["Shred"](self).run(args))
@@ -288,7 +297,7 @@ class Runnow:
                 elif cmd == "iz":
                     if "StringsExtract" in self.modules:                      
                         self.modules["StringsExtract"](self).run(args)
-              
+
                 elif cmd == "ax":
                     if "Analyze" in self.modules:
                         self.check_and_print(self.modules["Analyze"](self).runXREF(args))
@@ -326,8 +335,15 @@ class Runnow:
 
                 else:
                     print("[\033[1mWARNING\033[0m] Unknown command. Type \033[1m'help'\033[0m for options.")
+                
+                # --- END BENCHMARK TIMER ---
+                if is_operational:
+                    end_time = time.perf_counter()
+                    execution_time = (end_time - start_time) * 1000  # Konversi ke milidetik (ms)
+                    print(f"[\033[1mBENCHMARK\033[0m] Command '{cmd}' executed in \033[1m{execution_time:.4f} ms\033[0m")
+
             except (KeyboardInterrupt, EOFError):                
-                break         
+                break                                                  
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
