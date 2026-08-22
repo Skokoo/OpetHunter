@@ -153,7 +153,8 @@ Output Example (A snippet, as the output is massive):
     }
   0xa99b        0x1000a99b      -> wneigh.1669
     // Auto-Decompile Code Block at 0x1000a9a6
-    {                                                    byte ptr [rbx + 0x70] += dh;
+    {
+        byte ptr [rbx + 0x70] += dh;
         dword ptr cs:[arg2] ^= esi;
         eax ^= 0x71650030;
         byte ptr [arg2] ^= ch;
