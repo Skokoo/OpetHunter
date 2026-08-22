@@ -100,6 +100,10 @@ Output Example:
 * **Role:** Engine backend for cursor positioning synchronization (`s` command).
 * **Logic:** Leverages optimized native substring search mechanisms to locate hardware function prologues (`0xb7` bitmask variants for ARM64 and standard `push rbp` byte sequences for x86_64). Employs `bisect_left` boundary evaluation to proactively extrapolate the nearest valid function entry point when the current cursor address resides inside padding regions.
 
+```
+Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]                                         -> Nearest valid function entry point found at: 0x10000a20
+```
+
 ### F. FUNC/shred.py
 * **Role:** Engine backend for the `shred` command subsystem.
 * **Logic:** Evaluates cyclomatic complexity within target function boundaries. Analyzes binary conditional branch density profiles utilizing architecture-specific bitmasks (`0x14`/`0x94` for AArch64 and standard conditional jump opcodes for Intel x86_64).
