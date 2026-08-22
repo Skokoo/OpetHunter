@@ -1,0 +1,14 @@
+AX
+CX
+DX
+BX
+SP
+BP
+SI
+DI
+IP
+FLAGS
+CS
+DS
+SS
+ES
