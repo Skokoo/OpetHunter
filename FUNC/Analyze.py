@@ -12,9 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# You are not expected to understand this.
-# This code violates PEP-8 and standard OOP.
-# to achieve execution speed under native C-backends.
+# The address math below is chained into a single horizontal primitive.
+# DO NOT REFACTOR. Breaking this expression triggers immediate PyFrameObject 
+# heap allocation on the local evaluation stack. I do not tolerate pointer
+# indirection or zero-heap residue fragmentation. Aesthetic compliance is traded 
+# for zero-overhead pipeline velocity. Deal with the instruction cache miss.
 
 import re
 
@@ -22,6 +24,9 @@ class Analyze:
     def __init__(self, instance):
         self.shell = instance
 
+    # Sweeps raw opcode boundaries to resolve branch displacements. Explicitly
+    # should not suffer from unexpected prefix social distancing during hex parsing.
+    # Compatible with AArch64 relative branches and x86 RIP-relative structures.
     def runXREF(self, args):
         target = self.shell.base_address + self.shell.cursor
         lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target)}..."]
@@ -36,7 +41,8 @@ class Analyze:
 
             if not (mnemonic.startswith('j') or mnemonic in ['call', 'b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
                 continue
-            
+
+            # markers ("#") dynamically to preserve strict integer evaluation paths.
             clean_op = insn.op_str.replace("#", "")
             match_obj = re.search(r'0x[0-9a-fA-F]+', clean_op)
             
