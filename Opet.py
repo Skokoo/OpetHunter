@@ -245,8 +245,7 @@ class Runnow:
                     if matches:
                         formatted_matches = ", ".join(f"'\033[1m{m}\033[0m'" for m in matches)
                         print(f"[\033[1mWARNING\033[0m] Command not found. Did you mean: {formatted_matches}?")
-                        continue
-                    else:                        
+                        continue                                          
                         
                 if cmd in ["q", "exit"]: 
                     break
