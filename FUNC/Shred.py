@@ -35,22 +35,28 @@ class Shred:
         binary = self.shell.binary_data
         base = self.shell.base_address
         size = self.shell.file_size
+        arch = getattr(self.shell, 'arch_type', 'x86_64')
 
         bold = getattr(self.shell, 'BOLD', '\033[1m')
         reset = getattr(self.shell, 'RESET', '\033[0m')
         cyan = getattr(self.shell, 'CYAN', '\033[96m')
         yellow = getattr(self.shell, 'YELLOW', '\033[93m')
 
-        lines = [
-            f"\n[{bold}INFO{reset}] Executing  binary shredding sequences.\n",           
-        ]      
-
+        lines = [f"\n[{bold}INFO{reset}] Executing binary shredding sequences.\n"]           
         lines.append(f"[{bold}INFO{reset}] Scanning global execution mapping functions.\n")
 
-        points_x86 = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\x55\x48\x89\xE5"]
-        points_arm = [idx for idx in range(len(binary) - 3) if binary[idx:idx+4] == b"\xFF\x43\x00\xD1"]
-        all_funcs = sorted(list(set(points_x86 + points_arm)))
+        all_funcs = []        
+        idx = binary.find(b"\x55\x48\x89\xE5")
+        while idx != -1:
+            all_funcs.append(idx)
+            idx = binary.find(b"\x55\x48\x89\xE5", idx + 1)            
+        
+        idx = binary.find(b"\xFF\x43\x00\xD1")
+        while idx != -1:
+            all_funcs.append(idx)
+            idx = binary.find(b"\xFF\x43\x00\xD1", idx + 1)
 
+        all_funcs = sorted(list(set(all_funcs)))
         lines.append(f"[INFO*] Global binary analysis: Discovered {bold}{len(all_funcs)}{reset} native function subroutines.")
 
         if all_funcs:           
@@ -64,11 +70,15 @@ class Shred:
         lines.append(f"[INFO*] Localized address cursor : {hex(base + self.shell.cursor)}")
         lines.append(f"[INFO*] Shredder targeted code   : {cyan}{hex(target_vaddr)}{reset}")      
 
-        target_chunk = binary[target_vaddr - base : (target_vaddr - base) + 64]
-        branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) 
+        target_chunk = binary[target_vaddr - base : (target_vaddr - base) + 64]      
+        
+        if arch == "aarch64":            
+            branches_count = sum(1 for b in target_chunk if b in (0x14, 0x94, 0x35, 0xd6))
+        else:           
+            branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8))
+
         if branches_count > 0:
             lines.append(f"[INFO*] Control Flow Density  : Found {yellow}{bold}{branches_count}{reset} active branch conditions / block markers inside target.")        
-                   
+
         lines.append(f"\n[{bold}INFO{reset}] Binary layers shredded successfully.\n")
         return "\n".join(lines)
-            
