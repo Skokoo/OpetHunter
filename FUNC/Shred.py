@@ -67,7 +67,7 @@ class Shred:
         target_chunk = binary[target_vaddr - base : (target_vaddr - base) + 64]
         branches_count = sum(1 for b in target_chunk if b in (0x74, 0x75, 0xeb, 0xe8, 0xb4, 0x35)) 
         if branches_count > 0:
-            lines.append(f"[INFO*] Control Flow Density  : Found {yellow}{bold}{branches_count}{reset} active branch conditions / block markers inside target.\n")        
+            lines.append(f"[INFO*] Control Flow Density  : Found {yellow}{bold}{branches_count}{reset} active branch conditions / block markers inside target.")        
                    
         lines.append(f"\n[{bold}INFO{reset}] Binary layers shredded successfully.\n")
         return "\n".join(lines)
