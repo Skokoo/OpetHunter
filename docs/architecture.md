@@ -2,7 +2,7 @@
 
 An optimized, 64-bit cross-operating system binary analysis engine, architected to operate strictly within a ~28MB RAM.
 
-## Core Component Pipeline (`FUNC/`)
+### Core Component Pipeline (`FUNC/`)
 The implementation within the `FUNC/` directory utilizes highly dense algorithmic structures. While computationally complex, this architecture eliminates abstraction layers to guarantee maximum execution velocity and predictable memory overhead.
 
 ---
