@@ -35,7 +35,7 @@ Output Example:
 * **Role:** Engine backend for the `asmd` command blocks.
 * **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
 
-Outpur example:
+Output Example:
 ```
 void entry_point_0x10000a5c() {
     rip + 0x2088a5 = rax;
@@ -57,9 +57,36 @@ void function_0x10000a98() {
 * **Role:** Engine backend for the `px` command.
 * **Logic:** Translates raw memory streams into standardized hexadecimal and ASCII layouts. Utilizes lightweight array slice iterators to stream dense hexadecimal matrices to the console without inducing memory fragmentation.
 
+Output Example:
+```
+ [INFO] Hex Dump at 0x10000a5c
+===========================================================================
+ Offset      00 01 02 03 04 05 06 07  08 09 0a 0b 0c 0d 0e 0f   ASCII
+---------------------------------------------------------------------------
+ 0x10000a5c  48 89 05 a5 88 20 00 ff  14 c5 10 90 60 00 48 8b  H.... ......`.H.
+ 0x10000a6c  05 97 88 20 00 48 39 d8  72 e2 c6 05 83 88 20 00  ... .H9.r..... .
+ 0x10000a7c  01 48 83 c4 08 5b c9 c3  66 66 66 2e 0f 1f 84 00  .H...[..fff.....
+ 0x10000a8c  00 00 00 00 48 83 3d 88  85 20 00 00 55 48 89 e5  ....H.=.. ..UH..
+ 0x10000a9c  74 12 b8 00 00 00 00 48  85 c0 74 08 bf 20 90 60  t......H..t.. .`
+ 0x10000aac  00 c9 ff e0 c9 c3 90 90  55 48 89 e5 41 54 53 48  ........UH..ATSH
+ 0x10000abc  81 ec 90 08 00 00 48 8d  85 b0 fe ff ff ba 0a 00  ......H.........
+ 0x10000acc  00 00 be 20 7c 40 00 48  89 c7 e8 75 fe ff ff 48  ... |@.H...u...H
+---------------------------------------------------------------------------
+```
+
 ### D. FUNC/integrity.py
 * **Role:** Engine backend for the `ai` command.
 * **Logic:** Validates ELF magical structures (`7f 45 4c 46`) and machine class headers. Executes proactive integrity checks, monitors symbol table anomalies, scans for packers, and reports structural deviations within target sections.
+
+Output Example:
+```
+
+============================================================                                               [INFO] Anti-tamper & Binary integrity                                                                    ============================================================                                                * Target File Size : 44571 bytes                                                                          * ELF Magic Status : Valid/ok (7f 45 4c 46)
+  * Class / Encoding : 64-bit / Little-Endian                                                               * Hardware Target  : x86_64 (AMD64)
+  * Binary ELF Type  : EXEC (Executable file)                                                               * Header Integrity : INTECT (Standard Linux Section Mapping)
+  * Symbol Visibility: [INFO] Debug symbols available                                                       * Threat Indicators: [INFO] No malicious hook signatures found                                            * Packer Signature : [INFO] Native format templates layout unpacked
+  * Final verdict    : [INFO] Binary template structures comply with standard runtime rules.
+```
 
 ### E. FUNC/seeker.py
 * **Role:** Engine backend for cursor positioning synchronization (`s` command).
