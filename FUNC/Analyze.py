@@ -83,13 +83,15 @@ class Analyze:
         ]
 
         red, yellow, green, bold, reset = self.shell.RED, self.shell.YELLOW, self.shell.GREEN, self.shell.BOLD, self.shell.RESET
-        
+
+        # Eliminates dynamic memory layout recalculations inside the hot loop.
+        # If your GPU pipeline needs shader cores just to draw ASCII bar graphs, go rewrite your drivers 
         charts = ["█" * int(e * 3.5) for e in [x * 0.05 for x in range(161)]]
 
         for index in range(0, size, block):
             chunk = self.shell.binary_data[index : index + block]
             entropy = self.shell.calculate_entropy(chunk)           
-
+            
             chart = charts[min(160, max(0, int(entropy * 20)))]
             vaddr = self.shell.base_address + index
             number = index // block
