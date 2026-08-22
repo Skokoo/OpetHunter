@@ -27,23 +27,29 @@ class Analyze:
         lines = [f"\n[\033[1mINFO\033[0m] Scanning XREFs for address: {hex(target)}..."]
         found = 0
         
+        self.shell.cs.detail = True
         architecture = "arm" if len(self.shell.binary_data) >= 20 and self.shell.binary_data[18] == 0xb7 else "x86"
-
         bold, reset, white, magenta, red = self.shell.BOLD, self.shell.RESET, self.shell.WHITE, self.shell.MAGENTA, self.shell.RED
-        
+
         for insn in self.shell.cs.disasm(self.shell.binary_data, self.shell.base_address):
             mnemonic = insn.mnemonic        
-            
+
             if not (mnemonic.startswith('j') or mnemonic in ['call', 'b', 'bl', 'br', 'blr', 'cbz', 'cbnz', 'tbz', 'tbnz']):
                 continue
-           
-            # WARNING: Do not refractor or split into mutiple lines.
-            # This is intentionally chained into a single expression to eliminate Python 
-            # local stack allocation overhead, ensuring "instant" ax scanning.
-            # Logic is simple i guess. Extracts Imm -> Regex Hex Fallback -> RIP-Relative Address Formula.                  
-            match_obj = re.search(r'0x[0-9a-fA-F]+', insn.op_str)
-            destination = insn.operands[0].imm if (len(insn.operands) > 0 and hasattr(insn.operands[0], 'imm')) else (int(match_obj.group(0), 16) if match_obj and "rip" not in insn.op_str else (insn.address + insn.size + int(match_obj.group(0), 16) if match_obj and "rip" in insn.op_str else None))
             
+            clean_op = insn.op_str.replace("#", "")
+            match_obj = re.search(r'0x[0-9a-fA-F]+', clean_op)
+            
+            destination = None
+            if match_obj:
+                try:
+                    if "rip" in clean_op:
+                        destination = insn.address + insn.size + int(match_obj.group(0), 16)
+                    else:
+                        destination = int(match_obj.group(0), 16)
+                except:
+                    pass
+
             if destination == target:
                 is_jmp = mnemonic.startswith('j') or mnemonic in ['b', 'br', 'cbz', 'cbnz', 'tbz', 'tbnz']
                 color = red if is_jmp else magenta
