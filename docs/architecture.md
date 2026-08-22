@@ -21,7 +21,7 @@ Output Example (ax):
 [ERROR] No external XREFs found for this address.
 ```            
 
-Output Example (ae):
+Output Example (ae, a snippet):
 
 ```
 #204    0x10019800      6.07/8.0        [CODE]   █████████████████████
