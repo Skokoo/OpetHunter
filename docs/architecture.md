@@ -38,17 +38,17 @@ Output Example:
 Outpur example:
 ```
 void entry_point_0x10000a5c() {
-    [0x10000a5c]  rip + 0x2088a5 = rax;
-    [0x10000a60]  sub_rax*8 + 0x609010();
-    [0x10000a68]  rax = rip + 0x208897;
+    rip + 0x2088a5 = rax;
+    sub_rax*8 + 0x609010();
+    rax = rip + 0x208897;
 } // End of While Loop
 
-[0x10000a6c]  rip + 0x208883 = 1;
+rip + 0x208883 = 1;
 return;
 
 // Function detected at 0x10000a98 (x86_64)
 void function_0x10000a98() {
-    [0x10000a98]  rbp = rsp;
+    rbp = rsp;
     return;
 }
 ```
