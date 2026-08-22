@@ -114,7 +114,9 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 [INFO] Scanning global execution mapping functions. 
                                                                                                                                                                 [INFO*] Global binary analysis: Discovered 20 native function subroutines.
 [INFO*] Smart-Target Lock     : Auto-selected nearest function cluster boundary.
-[INFO*] Localized address cursor : 0x10000a5c                                                             [INFO*] Shredder targeted code   : 0x10000a20                                                             [INFO*] Control Flow Density  : Found 3 active branch conditions / block markers inside target.
+[INFO*] Localized address cursor : 0x10000a5c                                                             
+[INFO*] Shredder targeted code   : 0x10000a20                                                             
+[INFO*] Control Flow Density  : Found 3 active branch conditions / block markers inside target.
 
 [INFO] Binary layers shredded successfully.
 ```
