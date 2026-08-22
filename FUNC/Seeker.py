@@ -12,6 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+#   Binary Search Boundary Tracker: Powered by native C-level bisect logic.
+#   If your navigation engine triggers virtual memory page faults just to step back 
+#   4 bytes to find 'push rbp', go back to writing CSS animations.
+
 import bisect
 
 class Seeker:
