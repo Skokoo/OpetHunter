@@ -63,8 +63,10 @@ class Disasm:
             f"\n[\033[1mINFO\033[0m] Disassembly at {hex(vaddr)} ({'ARM64' if architecture == 'aarch64' else 'x86_64'})", 
             f"{bold}Address\t\tHex Bytes\t\tFlow\tInstruction{reset}", 
             "-" * 85
-        ]       
+        ]
 
+        # Context-Aware Regex Pipeline, dynamically streams reg_map.json keys 
+        # to transpile raw machine registers into human-readable variable tokens.             
         pattern = r'\b(' + '|'.join(reg_map.keys()) + r')\b' if reg_map else (r'\b(x\d+|w\d+|sp|wsp|pc|lr|xzr|wzr)\b' if architecture == "aarch64" else r'\b(r[a-d]x|e[a-d]x|rsp|rbp|esp|ebp|rsi|rdi|r\d+)\b')
 
         index = 0
