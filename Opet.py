@@ -223,7 +223,7 @@ class Runnow:
     def run_shell(self):
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
-        valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
+        valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'info', 'ai', 'help', 'exit']
         archi = f"{CYAN}[AArch64]{RESET}" if self.arch_type == "aarch64" else f"{MAGENTA}[x86_64]{RESET}"
 
         while True:
