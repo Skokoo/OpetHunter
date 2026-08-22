@@ -36,7 +36,7 @@ Output Example:
 * **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
 
 Output Example:
-```
+```c
 void entry_point_0x10000a5c() {
     rip + 0x2088a5 = rax;
     sub_rax*8 + 0x609010();
