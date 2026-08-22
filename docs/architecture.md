@@ -35,6 +35,24 @@ Output Example:
 * **Role:** Engine backend for the `asmd` command blocks.
 * **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
 
+Outpur example:
+```
+void entry_point_0x10000a5c() {
+    [0x10000a5c]  rip + 0x2088a5 = rax;
+    [0x10000a60]  sub_rax*8 + 0x609010();
+    [0x10000a68]  rax = rip + 0x208897;
+} // End of While Loop
+
+[0x10000a6c]  rip + 0x208883 = 1;
+return;
+
+// Function detected at 0x10000a98 (x86_64)
+void function_0x10000a98() {
+    [0x10000a98]  rbp = rsp;
+    return;
+}
+```
+
 ### C. FUNC/hexdump.py
 * **Role:** Engine backend for the `px` command.
 * **Logic:** Translates raw memory streams into standardized hexadecimal and ASCII layouts. Utilizes lightweight array slice iterators to stream dense hexadecimal matrices to the console without inducing memory fragmentation.
