@@ -9,7 +9,6 @@ Please strictly adhere to the guidelines below before submitting any issues or p
 * **Preserve Core Control Flow & Logical Integrity:** Do not disrupt or break the existing logical pipeline of the decompiler. Every contribution must seamlessly integrate with the established analysis, parsing, and decompilation phases without introducing regressions.
 * **Efficient Complexity Over Clean-Code Minimalism:** This tool solves complex reverse engineering problems, and complex code additions are expected. However, complexity must never compromise execution efficiency. Optimize for minimal CPU overhead, strict memory management, and ensure zero critical memory leaks.
 * **Zero-Tolerance for Unintended Side Effects:** You must thoroughly test your code across different binary samples. Do not introduce hidden regressions, unpredictable behaviors, or unexpected edge-case bugs into the engine.
-* **Strict Cross-Architecture Design:** Opet is built as a multi-processor tool. Do not restrict implementation or hardcode components to be compatible with only one specific processor. All parsing, disassembly, and lifting logic must remain scalable and generic across architectures (e.g., ARM64, x86_64).
 
 ## 2. Mandatory Technical Review
 
