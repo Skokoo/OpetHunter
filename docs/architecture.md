@@ -1,4 +1,4 @@
-# System Architecture Specification
+# Architecture Specification
 
 An optimized, 64-bit cross-operating system binary analysis engine, architected to operate strictly within a ~28MB RAM.
 
