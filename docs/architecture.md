@@ -13,6 +13,8 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 * **Role:** Engine backend for the `info` command subsystem.
 * **Logic:** Extracts primary file size metrics, fingerprints compiler variants, maps binary linking topologies, and resolves minimum target system dependencies (e.g., `GLIBC` symbols). 
 
+Output Example:
+
 ```
 ========================================================================
  [INFO] METADATA
