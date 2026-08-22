@@ -218,11 +218,9 @@ class Runnow:
                 break
 
         c_lines.append("    }")
-        return "\n".join(c_lines)
+        return "\n".join(c_lines)                                                  
 
     def run_shell(self):
-        import time  # Pastikan module time diimpor
-        
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
         valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'info', 'ai', 'help', 'exit']      
@@ -252,14 +250,7 @@ class Runnow:
 
                 if cmd in ["q", "exit"]: 
                     break
-                
-                # --- START BENCHMARK TIMER ---
-                # Mengukur waktu hanya untuk komando operasional analisis
-                is_operational = cmd not in ["help", "?"]
-                if is_operational:
-                    start_time = time.perf_counter()
-
-                if cmd in ["help", "?"]:  
+                elif cmd in ["help", "?"]:  
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
                                  f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
@@ -335,15 +326,8 @@ class Runnow:
 
                 else:
                     print("[\033[1mWARNING\033[0m] Unknown command. Type \033[1m'help'\033[0m for options.")
-                
-                # --- END BENCHMARK TIMER ---
-                if is_operational:
-                    end_time = time.perf_counter()
-                    execution_time = (end_time - start_time) * 1000  # Konversi ke milidetik (ms)
-                    print(f"[\033[1mBENCHMARK\033[0m] Command '{cmd}' executed in \033[1m{execution_time:.4f} ms\033[0m")
-
             except (KeyboardInterrupt, EOFError):                
-                break                                                  
+                break                                                                                                                        
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
