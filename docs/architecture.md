@@ -15,7 +15,13 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 
 ```
 ============================================================
- [INFO] METADATA ============================================================                              * Size   : 44571 bytes                       * Format : ELF (Linux)                       * Arch   : x86_64                            * Lang   : C / C++ or Native ASM             * Comp   : GCC (GNU Compiler Collection)     * Target : Linux Kernel (Requires GLIBC_2.2)
+ [INFO] METADATA ============================================================                              * Size   : 44571 bytes
+                       * Format : ELF (Linux)                       
+* Arch   : x86_64
+                            * Lang   : C / C++ or Native ASM             
+* Comp   : GCC (GNU Compiler Collection)
+     * Target : Linux Kernel (Requires GLIBC_2.2)
+
   * Linker : GNU ld (Standard Linux)    [INFO] Alerts/Protections: None (Clean ASM) ============================================================
 ```                                                                                             
 ### B. FUNC/disasm.py
