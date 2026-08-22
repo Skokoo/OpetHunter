@@ -42,7 +42,7 @@ class CapstoneDecompiler:
         
         matched = re.search(r'\b(rbp|rsp|sp|x29)\b\s*([-+,#])\s*(0x[0-9a-fA-F]+|[0-9]+)', clean)
         if matched:
-            return f"local_var_{match.group(3).replace('#', '')}h"            
+            return f"local_var_{matched.group(3).replace('#', '')}h"            
         
         for reg, var in self.reg_cleaner.items():
             clean = re.sub(rf'\b{reg}\b', var, clean)
