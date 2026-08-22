@@ -1,6 +1,6 @@
 # System Architecture Specification
 
-An ultra-optimized, zero-bloat 64-bit cross-operating system binary analysis engine, architected to operate strictly within a 27MB RAM constraint.
+An optimized, 64-bit cross-operating system binary analysis engine, architected to operate strictly within a ~28MB RAM.
 
 ## Core Component Pipeline (`FUNC/`)
 The implementation within the `FUNC/` directory utilizes highly dense algorithmic structures. While computationally complex, this architecture eliminates abstraction layers to guarantee maximum execution velocity and predictable memory overhead.
@@ -11,26 +11,29 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 
 ### A. FUNC/analyze.py (1.8388 ms & 11.9777 ms)
 * **Role:** Engine backend for the `ax` & 'ae' command subsystem.
-* **Logic:** 
+* **Logic1/ax:** Sweeps raw opcode boundaries to resolve branch displacements. Compatible with AArch64 relative branches and x86 RIP-relative structures.
+* **Logic2/ae:** Calculates algorithmic high-density randomness statistics directly on byte arrays. If the entropy metrics hit 7.99, the target binary layer is packed tighter. 
 
-Output Example:
+Output Example (ax):
 
 ```
-========================================================================
- [INFO] METADATA
-========================================================================
- * Size   : 44571 bytes
- * Format : ELF (Linux)
- * Arch   : x86_64
- * Lang   : C / C++ or Native ASM
- * Comp   : GCC (GNU Compiler Collection)
- * Target : Linux Kernel (Requires GLIBC_2.2)
- * Linker : GNU ld (Standard Linux)
+[INFO] Scanning XREFs for address: 0x10000000...
+[ERROR] No external XREFs found for this address.
+```            
 
- [INFO] ALERTS & PROTECTIONS
- * Status : None (Clean ASM / No Packer Detected)
-========================================================================
-```                                                                                             
+Output Example (ae):
+
+```
+#204    0x10019800      6.07/8.0        [CODE]   █████████████████████
+#205    0x10019a00      6.09/8.0        [CODE]   █████████████████████                                    #206    0x10019c00      4.36/8.0        [CODE]   ███████████████                                          #207    0x10019e00      4.43/8.0        [CODE]   ███████████████                                          #208    0x1001a000      4.49/8.0        [CODE]   ███████████████
+#209    0x1001a200      4.44/8.0        [CODE]   ███████████████
+#210    0x1001a400      0.78/8.0        [DATA]   ██                                                       #211    0x1001a600      1.67/8.0        [DATA]   █████
+#212    0x1001a800      1.55/8.0        [DATA]   █████                                                    #213    0x1001aa00      2.07/8.0        [DATA]   ███████                                                  #214    0x1001ac00      5.07/8.0        [CODE]   █████████████████
+#215    0x1001ae00      2.26/8.0        [DATA]   ███████
+#216    0x1001b000      1.48/8.0        [DATA]   █████
+#217    0x1001b200      1.47/8.0        [DATA]   █████
+#218    0x1001b400      1.13/8.0        [DATA]   ███
+```                                                                             
 ### B. FUNC/disasm.py (2.1543 ms)
 * **Role:** Engine backend for the `asmd` command blocks.
 * **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
