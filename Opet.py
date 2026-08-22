@@ -79,17 +79,10 @@ else:
 import readline
 
 commands = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
+
 def completer(text, state):
     options = [cmd for cmd in commands if cmd.startswith(text)]
     return options[state] if state < len(options) else None
-
-readline.set_completer(completer)
-readline.parse_and_bind("tab: complete")
-
-if 'libedit' in readline.__doc__.lower() if readline.__doc__ else False:
-    readline.parse_and_bind("bind ^I rl_complete") 
-else:
-    readline.parse_and_bind("tab: complete")
 
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
