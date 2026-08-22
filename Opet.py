@@ -76,14 +76,6 @@ else:
             print(f"[\033[1mERROR\033[0m] Failed to import: {file_name}.{class_name}: {e}")
             sys.exit(1)
 
-import readline
-
-commands = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
-
-def completer(text, state):
-    options = [cmd for cmd in commands if cmd.startswith(text)]
-    return options[state] if state < len(options) else None
-
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
@@ -231,7 +223,7 @@ class Runnow:
     def run_shell(self):
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
-        readline.set_completer(completer)
+        valid_cmds = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
 
         while True:
             try:
@@ -244,10 +236,15 @@ class Runnow:
                     continue
 
                 cmd_input = raw_input.split()
-                cmd = cmd_input[0].lower()
+                user_typed = cmd_input[0].lower()
                 args = cmd_input[1:] if len(cmd_input) > 1 else None
-                self.last_args = args
-
+                self.last_args = args                
+                cmd = user_typed
+                if user_typed not in valid_cmds:
+                    matches = [c for c in valid_cmds if c.startswith(user_typed)]
+                    if len(matches) == 1:
+                        cmd = matches[0]  
+                        
                 if cmd in ["q", "exit"]: 
                     break
                 elif cmd in ["h", "help", "?"]:                   
