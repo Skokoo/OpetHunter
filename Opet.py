@@ -86,6 +86,11 @@ def completer(text, state):
 readline.set_completer(completer)
 readline.parse_and_bind("tab: complete")
 
+if 'libedit' in readline.__doc__.lower() if readline.__doc__ else False:
+    readline.parse_and_bind("bind ^I rl_complete") 
+else:
+    readline.parse_and_bind("tab: complete")
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
