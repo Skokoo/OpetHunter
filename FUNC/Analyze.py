@@ -69,6 +69,9 @@ class Analyze:
         lines.append("")
         return "\n".join(lines)
 
+    # Calculates algorithmic high-density randomness statistics directly on byte arrays. 
+    # If the entropy metrics hit 7.99, the target binary layer is packed tighter than 
+    # your loop unrolling constraints. 
     def EntropyMap(self):
         size = self.shell.file_size            
         block = 65536 if size > 5000000 else (4096 if size > 1000000 else (2048 if size > 500000 else 512))
