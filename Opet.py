@@ -76,6 +76,16 @@ else:
             print(f"[\033[1mERROR\033[0m] Failed to import: {file_name}.{class_name}: {e}")
             sys.exit(1)
 
+import readline
+
+commands = ['pd', 'px', 'ax', 'ae', 'iz', 'asmd', 'shred', 'info', 'ai', 'help', 'exit']
+def completer(text, state):
+    options = [cmd for cmd in commands if cmd.startswith(text)]
+    return options[state] if state < len(options) else None
+
+readline.set_completer(completer)
+readline.parse_and_bind("tab: complete")
+
 RESET   = "\033[0m"
 BOLD    = "\033[1m"
 RED     = "\033[91m"
