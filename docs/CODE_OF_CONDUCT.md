@@ -5,6 +5,7 @@ I am committed to providing a safe, respectful, and collaborative environment fo
 
 ## 2. Expected Behavior
 * **Professional Collaboration:** Share knowledge on ARM64/x86_64, provide constructive code reviews, and respect diverse technical perspectives.
+* **Respecting Mistakes:** Respect the mistakes of others instead of mocking them. Everyone makes mistakes, and they should be treated as learning opportunities rather than targets for ridicule.
 * **Prohibited Conduct:** Harassment, personal insults, political disputes, and the unauthorized disclosure of private information (doxxing) are strictly forbidden.
 * **Technical Focus:** Maintain discussions centered around the development of this pocket decompiler project. Non-technical or unrelated social debates should be avoided.
 
