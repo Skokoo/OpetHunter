@@ -80,12 +80,20 @@ Output Example:
 
 Output Example:
 ```
-
-============================================================                                               [INFO] Anti-tamper & Binary integrity                                                                    ============================================================                                                * Target File Size : 44571 bytes                                                                          * ELF Magic Status : Valid/ok (7f 45 4c 46)
-  * Class / Encoding : 64-bit / Little-Endian                                                               * Hardware Target  : x86_64 (AMD64)
-  * Binary ELF Type  : EXEC (Executable file)                                                               * Header Integrity : INTECT (Standard Linux Section Mapping)
-  * Symbol Visibility: [INFO] Debug symbols available                                                       * Threat Indicators: [INFO] No malicious hook signatures found                                            * Packer Signature : [INFO] Native format templates layout unpacked
-  * Final verdict    : [INFO] Binary template structures comply with standard runtime rules.
+========================================================================
+ [INFO] Anti-tamper & Binary Integrity
+========================================================================
+ * Target File Size : 44571 bytes
+ * ELF Magic Status : Valid/ok (7f 45 4c 46)
+ * Class / Encoding : 64-bit / Little-Endian
+ * Hardware Target  : x86_64 (AMD64)
+ * Binary ELF Type  : EXEC (Executable file)
+ * Header Integrity : INTECT (Standard Linux Section Mapping)
+ * Symbol Visibility: Debug symbols available
+ * Threat Indicators: No malicious hook signatures found
+ * Packer Signature : Native format templates layout unpacked
+ * Final Verdict    : Binary template structures comply with standard runtime rules.
+========================================================================
 ```
 
 ### E. FUNC/seeker.py
