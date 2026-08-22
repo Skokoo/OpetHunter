@@ -9,7 +9,7 @@ The implementation within the `FUNC/` directory utilizes highly dense algorithmi
 
 ## 1. Granular Component Specification
 
-### A. FUNC/analyze.py (1.8388 ms & 11.9777 ms)
+### A. FUNC/Analyze.py (1.8388 ms & 11.9777 ms)
 * **Role:** Engine backend for the `ax` & `ae` command subsystem.
 * **Logic1/ax:** Sweeps raw opcode boundaries to resolve branch displacements. Compatible with AArch64 relative branches and x86 RIP-relative structures.
 * **Logic2/ae:** Calculates algorithmic high-density randomness statistics directly on byte arrays. If the entropy metrics hit 7.99, the target binary layer is packed tighter. 
@@ -34,7 +34,7 @@ Output Example (ae, a snippet):
 #217    0x1001b200      1.47/8.0        [DATA]   █████
 #218    0x1001b400      1.13/8.0        [DATA]   ███
 ```                                                                             
-### B. FUNC/disasm.py (2.1543 ms)
+### B. FUNC/Disasm.py (2.1543 ms)
 * **Role:** Engine backend for the `asmd` command blocks.
 * **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
 
@@ -56,7 +56,7 @@ void function_0x10000a98() {
 }
 ```
 
-### C. FUNC/hexdump.py (1.4156 ms)
+### C. FUNC/HexDump.py (1.4156 ms)
 * **Role:** Engine backend for the `px` command.
 * **Logic:** Translates raw memory streams into standardized hexadecimal and ASCII layouts. Utilizes lightweight array slice iterators to stream dense hexadecimal matrices to the console without inducing memory fragmentation.
 
@@ -77,7 +77,7 @@ Output Example:
 ---------------------------------------------------------------------------
 ```
 
-### D. FUNC/integrity.py (0.5259 ms)
+### D. FUNC/Integrity.py (0.5259 ms)
 * **Role:** Engine backend for the `ai` command.
 * **Logic:** Validates ELF magical structures (`7f 45 4c 46`) and machine class headers. Executes proactive integrity checks, monitors symbol table anomalies, scans for packers, and reports structural deviations within target sections.
 
@@ -99,7 +99,7 @@ Output Example:
 ========================================================================
 ```
 
-### E. FUNC/seeker.py (0.6266 ms)
+### E. FUNC/Seeker.py (0.6266 ms)
 * **Role:** Engine backend for cursor positioning synchronization (`s` command).
 * **Logic:** Leverages optimized native substring search mechanisms to locate hardware function prologues (`0xb7` bitmask variants for ARM64 and standard `push rbp` byte sequences for x86_64). Employs `bisect_left` boundary evaluation to proactively extrapolate the nearest valid function entry point when the current cursor address resides inside padding regions.
 
@@ -108,7 +108,7 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 -> Nearest valid function entry point found at: 0x10000a20
 ```
 
-### F. FUNC/shred.py (0.9191 ms)
+### F. FUNC/Shred.py (0.9191 ms)
 * **Role:** Engine backend for the `shred` command subsystem.
 * **Logic:** Evaluates cyclomatic complexity within target function boundaries. Analyzes binary conditional branch density profiles utilizing architecture-specific bitmasks (`0x14`/`0x94` for AArch64 and standard conditional jump opcodes for Intel x86_64).
 
@@ -124,7 +124,7 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 [INFO] Binary layers shredded successfully.
 ```
 
-### G. FUNC/strings.py (58.1065 ms)
+### G. FUNC/Strings.py (58.1065 ms)
 * **Role:** Engine backend for the `iz` command.
 * **Logic:** Scans specific binary segments to extract printable ASCII string tokens. Triggers automated localized decompiler heuristic injections adjacent to sensitive extracted symbols to provide context-aware binary clues.
 
