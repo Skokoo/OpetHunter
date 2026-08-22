@@ -3,6 +3,10 @@
 ## 1. Supported Versions
 Security updates and patches are exclusively provided for the latest release branch of the Opet project.
 
+Size   : 44571 bytes                                                                                    * Format : ELF (Linux)                                                                                    * Arch   : x86_64                                                                                         * Lang   : C / C++ or Native ASM                                                                          * Comp   : GCC (GNU Compiler Collection)                                                                  * Target : Linux Kernel (Requires GLIBC_2.2)
+  * Linker : GNU ld (Standard Linux)
+[INFO] Alerts/Protections: None (Clean ASM)
+
 | Version | Supported          |
 | ------- | ------------------ |
 | 1.0.x   | :white_check_mark: |
