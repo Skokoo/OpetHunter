@@ -238,6 +238,7 @@ class Runnow:
     def run_shell(self):
         filename = os.path.basename(self.filepath)
         print(f"[\033[1mINFO\033[0m] Loaded: \033[1m{filename}\033[0m ({self.file_size} bytes)")
+        readline.set_completer(completer)
 
         while True:
             try:
