@@ -249,7 +249,7 @@ class Runnow:
                         
                 if cmd in ["q", "exit"]: 
                     break
-                elif cmd in ["h", "help", "?"]:                   
+                elif cmd in ["help", "?"]:                   
                     help_text = (f"\n{BOLD}Available Commands:{RESET}\n"
                                  f"{BOLD}* Pipeline Flags{RESET}: Most commands support parameters '-o <file>' for export and '-cut <lines>' for line slicing.\n"
                                  f"* Most of these commands speed are O(1), O(log N), and O(N)\n\n"
@@ -264,7 +264,7 @@ class Runnow:
                                  f"  {BOLD}info{RESET}        : Scan external file signatures and compiler metadata leaks\n"
                                  f"  {BOLD}ai{RESET}          : Perform dynamic table mapping check for header tampering forensics\n"
                                  f"  {BOLD}!{RESET}<command>  : Pipe direct commands routing to the native Linux system shell\n"
-                                 f"  {BOLD}h, help{RESET}     : Show this commands operational guide\n"
+                                 f"  {BOLD}?, help{RESET}     : Show this commands operational guide\n"
                                  f"  q, {BOLD}exit{RESET}     : Terminate runtime shell session and clear registers\n")                                                       
                     self.check_and_print(help_text)                                                        
                 elif cmd == "pd":
