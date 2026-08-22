@@ -117,7 +117,7 @@ class Runnow:
 
         self.arch_type = "x86_64"
         if len(self.binary_data) > 0x12:       
-            if self.binary_data[0x12] == 0x28:
+            if self.binary_data[0x12] == 0xb7:
                 self.arch_type = "aarch64"
 
         if self.arch_type == "aarch64":
