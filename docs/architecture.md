@@ -109,7 +109,7 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 * **Role:** Engine backend for the `shred` command subsystem.
 * **Logic:** Evaluates cyclomatic complexity within target function boundaries. Analyzes binary conditional branch density profiles utilizing architecture-specific bitmasks (`0x14`/`0x94` for AArch64 and standard conditional jump opcodes for Intel x86_64).
 
-```text
+```bash
 [INFO] Executing binary shredding sequences.                                                              
 [INFO] Scanning global execution mapping functions. 
                                                                                                                                                                 [INFO*] Global binary analysis: Discovered 20 native function subroutines.
@@ -127,7 +127,7 @@ Cursor synchronized to: 0x10000a5c [WARNING: Inside Data/Padding]
 
 Output Example:
 
-```
+```c
 0xa971        0x1000a971      -> bwght.1569
     // Auto-Decompile Code Block at 0x1000a97b
     {
