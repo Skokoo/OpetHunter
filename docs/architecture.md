@@ -1,42 +1,49 @@
-# Architecture
-An ultra-optimized, zero-bloat 64-bit cross-OS binary analysis engine strictly bounded under a 27MB RAM constraint.
+# System Architecture Specification
 
-## FUNC/
-The code within this directory might be complex, but it pays off completely because the execution speed becomes fast.
+An ultra-optimized, zero-bloat 64-bit cross-operating system binary analysis engine, architected to operate strictly within a 27MB RAM constraint.
 
-## 1. Granular File & Specifications
+## Core Component Pipeline (`FUNC/`)
+The implementation within the `FUNC/` directory utilizes highly dense algorithmic structures. While computationally complex, this architecture eliminates abstraction layers to guarantee maximum execution velocity and predictable memory overhead.
+
+---
+
+## 1. Granular Component Specification
 
 ### A. FUNC/analyze.py
-* **Functionality:** Operates as the backend for the `info` command.
-* **Logic Core:** Extracts primary file size parameters, detects compiler variants, maps binary linking layouts, and extracts target minimum system dependency parameters (such as GLIBC_2.2).
+* **Role:** Engine backend for the `info` command subsystem.
+* **Logic:** Extracts primary file size metrics, fingerprints compiler variants, maps binary linking topologies, and resolves minimum target system dependencies (e.g., `GLIBC` symbols).
 
 ### B. FUNC/disasm.py
-* **Functionality:** Operates as the engine backend for the `asmd` command blocks.
-* **Logic Core:** Dynamically configures the Capstone disassembly context based on global runtime properties. It handles the linear instruction formatting buffer, and performs localized lambda map transformations into Pseudo-C structures.
+* **Role:** Engine backend for the `asmd` command blocks.
+* **Logic:** Dynamically initializes the Capstone disassembly contexts using global runtime state properties. Manages the linear instruction formatting buffer and performs localized lambda map transformations into Pseudo-C structures.
 
 ### C. FUNC/hexdump.py
-* **Functionality:** Operates as the engine backend for the `px` command.
-* **Logic Core:** Translates raw memory streams into localized hex/ASCII layouts. It employs lightweight array slice iterators to stream dense hexadecimal columns over the console output without causing memory fragmentation.
+* **Role:** Engine backend for the `px` command.
+* **Logic:** Translates raw memory streams into standardized hexadecimal and ASCII layouts. Utilizes lightweight array slice iterators to stream dense hexadecimal matrices to the console without inducing memory fragmentation.
 
 ### D. FUNC/integrity.py
-* **Functionality:** Operates as the engine backend for the `ai` command.
-* **Logic Core:** Validates ELF magical structures (`7f 45 4c 46`) and machine class headers. It performs proactive integrity checks, monitors symbol table anomalies, scans for packers, and reports anomalies on target sections.
+* **Role:** Engine backend for the `ai` command.
+* **Logic:** Validates ELF magical structures (`7f 45 4c 46`) and machine class headers. Executes proactive integrity checks, monitors symbol table anomalies, scans for packers, and reports structural deviations within target sections.
 
 ### E. FUNC/seeker.py
-* **Functionality:** Operates as the engine backend for the cursor positioning synchronization (`s` command).
-* **Logic Core:** Leverages native `bytearray.find()` substring methods to seek real hardware function prologues (`0xb7` for ARM64 and standard `push rbp` variants for x86_64). Employs `bisect_left` bounds searching to proactively suggest the nearest function entry point if the current cursor lands inside padding regions.
+* **Role:** Engine backend for cursor positioning synchronization (`s` command).
+* **Logic:** Leverages optimized native substring search mechanisms to locate hardware function prologues (`0xb7` bitmask variants for ARM64 and standard `push rbp` byte sequences for x86_64). Employs `bisect_left` boundary evaluation to proactively extrapolate the nearest valid function entry point when the current cursor address resides inside padding regions.
 
 ### F. FUNC/shred.py
-* **Functionality:** Operates as the engine backend for the `shred` block command.
-* **Logic Core:** Dynamically counts execution complexity within a target function boundary. It screens active binary conditional branch density profiles based on the architecture flags (`0x14`/`0x94` bitmasks on AArch64 and standard jump bytes on Intel x86_64).
+* **Role:** Engine backend for the `shred` command subsystem.
+* **Logic:** Evaluates cyclomatic complexity within target function boundaries. Analyzes binary conditional branch density profiles utilizing architecture-specific bitmasks (`0x14`/`0x94` for AArch64 and standard conditional jump opcodes for Intel x86_64).
 
 ### G. FUNC/strings.py
-* **Functionality:** Operates as the engine backend for the `iz` command.
-* **Logic Core:** Parses the binary layout to extract printable ASCII string tokens. It triggers automated local decompiler routine injections right beneath sensitive extracted symbol parameters to provide high-fidelity automated binary context clues.
+* **Role:** Engine backend for the `iz` command.
+* **Logic:** Scans specific binary segments to extract printable ASCII string tokens. Triggers automated localized decompiler heuristic injections adjacent to sensitive extracted symbols to provide context-aware binary clues.
 
-## 3. Memory Preservation & Instance Isolation
-All seven components inside the `FUNC/` directory use a unified lifecycle injection blueprint:
+---
+
+## 2. Memory Preservation & Instance Isolation
+
+To maintain a minimal memory footprint and enforce state isolation, all seven core components within the `FUNC/` directory implement a unified lifecycle dependency injection blueprint:
+
 ```python
-def __init__(self, instance):
+def __init__(self, instance):   
     self.shell = instance
 ```
