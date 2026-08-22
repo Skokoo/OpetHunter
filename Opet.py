@@ -266,7 +266,7 @@ class Runnow:
                                  f"  {BOLD}ai{RESET}          : Validate section headers for anti-analysis tampering forensics\n"
                                  f"  {BOLD}!{RESET}<command>  : Pipe direct command execution routing to the native Linux shell\n"
                                  f"  {BOLD}?, help{RESET}     : Show this advanced tactical operational command guide\n"
-                                 f"  q, {BOLD}exit{RESET}     : Terminate active runtime shell session and purge volatile registers\n" 
+                                 f"  q, {BOLD}exit{RESET}     : Terminate active runtime shell session and purge volatile registers\n\n" 
                                  f"{BOLD}* Architectural Details{RESET}: Read the framework design documentation at {BOLD}{CYAN}https://github.com/Skokoo/OpetHunter/blob/main/docs/architecture.md{RESET}\n")                                                                                      
                     self.check_and_print(help_text)                 
 
