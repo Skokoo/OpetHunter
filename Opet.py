@@ -116,7 +116,7 @@ class Runnow:
             sys.exit(1)
 
         self.arch_type = "x86_64"
-        if self.file_size > 0x12:           
+        if len(self.binary_data) > 0x12:       
             if self.binary_data[0x12] == 0x28:
                 self.arch_type = "aarch64"
 
