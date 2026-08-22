@@ -12,12 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-#   The address math below is chained into a single horizontal primitive.
-#   DO NOT REFACTOR. Breaking this expression triggers immediate PyFrameObject 
-#   heap allocation on the local evaluation stack. I do not tolerate pointer
-#   indirection or zero-heap residue fragmentation. Aesthetic compliance is traded 
-#   for zero-overhead pipeline velocity. Deal with the instruction cache miss.
-
 import re
 
 class Analyze:
